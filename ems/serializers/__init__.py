@@ -1,0 +1,19 @@
+from .branch_serializers import TblBranchSerializer
+from .menus_serializer import MenuSerializer
+from .user_branches_serializer import UserBranchesSerializer
+from .department_serializers import TblDepartmentSerializer
+
+from .role_serializer import RoleSerializer
+from .role_permission_serializer import RolePermissionSerializer
+from .portal_serializer import PortalSerializer
+from .designation_serializers import TblDesignationSerializer
+
+from .emp_basic_profile_serializers import EmpBasicProfileSerializer
+from .emp_address_serializers import EmpAddressDetailsSerializer
+
+from .emp_bank_serializers import TblEmpBankDetailsSerializer
+from .emp_nominee_serializers import TblEmpNomineeDetailsSerializer
+from .emp_official_info_serializers import TblEmpOfficialInformationSerializer
+from .dealer_serializer import DealerSerializer
+from .subdealer_serializer import SubDealerSerializer
+from .location_master_serializers import CountrySerializer, StateSerializer, CitySerializer

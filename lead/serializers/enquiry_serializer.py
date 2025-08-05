@@ -1,0 +1,149 @@
+# from rest_framework import serializers
+# from lead.models.enquiry import Enquiry
+# from lead.models.enquiry_address import EnquiryAddress
+# from lead.models.enquiry_loan_details import EnquiryLoanDetails
+# from lead.models.enquiry_verifications import EnquiryVerification
+# from lead.models.enquiry_images import EnquiryImages
+# from lead.models.enquiry_selfie import EnquirySelfie
+
+# class EnquiryAddressSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EnquiryAddress
+#         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+# class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EnquiryLoanDetails
+#         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+# class EnquiryVerificationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EnquiryVerification
+#         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+# class EnquiryImagesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EnquiryImages
+#         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+# class EnquirySelfieSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = EnquirySelfie
+#         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+# class EnquirySerializer(serializers.ModelSerializer):
+
+#     loan_type_display = serializers.SerializerMethodField(read_only=True)
+#     occupation_display = serializers.SerializerMethodField(read_only=True)
+    
+#     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
+#     enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
+#     enquiry_verification = EnquiryVerificationSerializer(read_only=True)
+#     enquiry_images = EnquiryImagesSerializer(many=True, read_only=True)
+#     enquiry_selfies = EnquirySelfieSerializer(many=True, read_only=True)
+
+#     class Meta:
+#         model = Enquiry
+#         fields = [ 
+#             "id", "name", "mobile_number", "lan_number",
+#             "loan_type", "loan_type_display",
+#             "occupation", "occupation_display",
+#             "employer_name", "number_of_years_service",
+#             "official_contact_number", "nature_of_service", "monthly_income",
+#             "business_name", "business_place", "business_contact_number",
+#             "nature_of_business", "income", "interested", "kyc_collected",
+#             "kyc_document", "kyc_number", "is_status", "is_steps",
+#             "enquiry_addresses",
+#             "enquiry_loan_details",
+#             "enquiry_verification",
+#             "enquiry_images",
+#             "enquiry_selfies",
+#         ]
+
+#     def get_loan_type_display(self, obj):
+#         return obj.loan_type.name if obj.loan_type else None
+
+#     def get_occupation_display(self, obj):
+#         return obj.get_occupation_display() if obj.occupation else None
+
+from rest_framework import serializers
+from lead.models.enquiry import Enquiry
+from lead.models.enquiry_address import EnquiryAddress
+from lead.models.enquiry_loan_details import EnquiryLoanDetails
+from lead.models.enquiry_verifications import EnquiryVerification
+from lead.models.enquiry_images import EnquiryImages
+from lead.models.enquiry_selfie import EnquirySelfie
+
+class EnquiryAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EnquiryAddress
+        exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
+    loan_type_display = serializers.SerializerMethodField()
+    loan_amount_range_display = serializers.SerializerMethodField()
+    property_type_display = serializers.SerializerMethodField()
+    property_document_type_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EnquiryLoanDetails
+        exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+    def get_loan_type_display(self, obj):
+        return obj.loan_type.name if obj.loan_type else None
+
+    def get_loan_amount_range_display(self, obj):
+        return str(obj.loan_amount_range) if obj.loan_amount_range else None
+
+    def get_property_type_display(self, obj):
+        return obj.property_type.name if obj.property_type else None
+
+    def get_property_document_type_display(self, obj):
+        return obj.property_document_type.name if obj.property_document_type else None
+
+class EnquiryVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EnquiryVerification
+        exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+class EnquiryImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EnquiryImages
+        exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+class EnquirySelfieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EnquirySelfie
+        exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+class EnquirySerializer(serializers.ModelSerializer):
+    loan_type_display = serializers.SerializerMethodField()
+    occupation_display = serializers.SerializerMethodField()
+
+    enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
+    enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
+    enquiry_verification = EnquiryVerificationSerializer(read_only=True)
+    enquiry_images = EnquiryImagesSerializer(many=True, read_only=True)
+    enquiry_selfies = EnquirySelfieSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Enquiry
+        fields = [
+            "id", "name", "mobile_number", "lan_number",
+            "loan_type", "loan_type_display",
+            "occupation", "occupation_display",
+            "employer_name", "number_of_years_service",
+            "official_contact_number", "nature_of_service", "monthly_income",
+            "business_name", "business_place", "business_contact_number",
+            "nature_of_business", "income", "interested", "kyc_collected",
+            "kyc_document", "kyc_number", "is_status", "is_steps",
+            "enquiry_addresses", "enquiry_loan_details",
+            "enquiry_verification", "enquiry_images", "enquiry_selfies",
+        ]
+
+    def get_loan_type_display(self, obj):
+        return obj.loan_type.name if obj.loan_type else None
+
+    def get_occupation_display(self, obj):
+        return obj.get_occupation_display() if obj.occupation else None
+

@@ -1,0 +1,290 @@
+==============================
+API Documentation
+==============================
+
+Base URL:
+---------
+http://127.0.0.1:9000/api/
+
+
+==============================
+Management Commands
+==============================
+
+Initialize super admin user only:
+---------------------------------
+python manage.py seed_admin_user
+
+Seed all initial data (roles, menus, users, etc.):
+--------------------------------------------------
+python manage.py seed_all
+
+==============================
+Test API
+==============================
+
+GET     {Base URL}test/
+
+
+==============================
+User & Authentication
+==============================
+
+GET     {Base URL}auth_system/user/
+POST    {Base URL}auth_system/login/
+POST    {Base URL}auth_system/verify-otp/
+POST    {Base URL}auth_system/resend-otp/
+POST    {Base URL}auth_system/logout/
+
+
+==============================
+API ENDPOINTS LIST
+==============================
+
+Enquiry Types
+-------------
+POST    {Base URL}lead/enquiry-types/
+GET     {Base URL}lead/enquiry-types/
+GET     {Base URL}lead/enquiry-types/?search=<search-term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/enquiry-types/<id>/
+PATCH   {Base URL}lead/enquiry-types/<id>/
+DELETE  {Base URL}lead/enquiry-types/<id>/
+
+
+Nature of Businesses
+--------------------
+POST    {Base URL}lead/nature-of-businesses/
+GET     {Base URL}lead/nature-of-businesses/
+GET     {Base URL}lead/nature-of-businesses/?search=<search-term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/nature-of-businesses/<id>/
+PATCH   {Base URL}lead/nature-of-businesses/<id>/
+DELETE  {Base URL}lead/nature-of-businesses/<id>/
+
+
+Product Types
+-------------
+POST    {Base URL}lead/product-types/
+GET     {Base URL}lead/product-types/
+GET     {Base URL}lead/product-types/?search=<search-term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/product-types/<id>/
+PATCH   {Base URL}lead/product-types/<id>/
+DELETE  {Base URL}lead/product-types/<id>/
+
+
+Property Types
+--------------
+POST    {Base URL}lead/property-types/
+GET     {Base URL}lead/property-types/
+GET     {Base URL}lead/property-types/?search=<search-term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/property-types/<id>/
+PATCH   {Base URL}lead/property-types/<id>/
+DELETE  {Base URL}lead/property-types/<id>/
+
+Property Documentes
+------------------
+POST    {Base URL}lead/property-documents/
+GET     {Base URL}lead/property-documents/?page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/property-documents/?search=<search-term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/property-documents/<id>/
+PATCH   {Base URL}lead/property-documents/<id>/
+DELETE  {Base URL}lead/property-documents/<id>/
+
+
+Loan Amount Ranges
+------------------
+POST    {Base URL}lead/loan-amount-ranges/
+GET     {Base URL}lead/loan-amount-ranges/?page=<page-number>&page_size=<page-size>
+GET     {Base URL}lead/loan-amount-ranges/<id>/
+PATCH   {Base URL}lead/loan-amount-ranges/<id>/
+DELETE  {Base URL}lead/loan-amount-ranges/<id>/
+
+
+
+==============================
+CMS Customers API Endpoints
+==============================
+
+GET     {Base URL}cms/customers/?page=<page-number>&page_size=<page-size>
+GET     {Base URL}cms/customers/count
+GET     {Base URL}cms/customers/search/?query=<search-term>&page=<page-number>&page_size=<page-size>
+
+============================================================
+EMS (Employee Management System) API Endpoints
+============================================================
+Base URL for EMS:
+-----------------
+{Base URL}ems/
+(Replace {Base URL} with your API root, e.g., http://127.0.0.1:9000/api/)
+
+Branch Endpoints
+----------------
+GET     {Base URL}ems/branch/
+GET     {Base URL}ems/branch/?search=<term>
+POST    {Base URL}ems/branch/
+GET     {Base URL}ems/branch/{id}/
+PATCH   {Base URL}ems/branch/{id}/
+DELETE  {Base URL}ems/branch/{id}/
+
+Department Endpoints
+--------------------
+GET     {Base URL}ems/departments/
+GET     {Base URL}ems/departments/?search=<term>
+POST    {Base URL}ems/departments/
+GET     {Base URL}ems/departments/{id}/
+PATCH   {Base URL}ems/departments/{id}/
+DELETE  {Base URL}ems/departments/{id}/
+
+Designation Endpoints
+---------------------
+GET     {Base URL}ems/designations/
+GET     {Base URL}ems/designations/?search=<term>
+GET     {Base URL}ems/designations/parents
+POST    {Base URL}ems/designations/
+GET     {Base URL}ems/designations/{id}/
+PATCH   {Base URL}ems/designations/{id}/
+DELETE  {Base URL}ems/designations/{id}/
+
+Menu Endpoints
+--------------
+GET     {Base URL}ems/menus/
+GET     {Base URL}ems/menus/?search=<term>
+POST    {Base URL}ems/menus/
+GET     {Base URL}ems/menus/{id}/
+PATCH   {Base URL}ems/menus/{id}/
+DELETE  {Base URL}ems/menus/{id}/
+GET     {Base URL}ems/menus/parents/
+GET     {Base URL}ems/menus/portal/{portal_id}/
+
+Portal Endpoints
+----------------
+GET     {Base URL}ems/portals/
+GET     {Base URL}ems/portals/?search=<term>
+POST    {Base URL}ems/portals/
+GET     {Base URL}ems/portals/{id}/
+PATCH   {Base URL}ems/portals/{id}/
+DELETE  {Base URL}ems/portals/{id}/
+
+Employee Basic Profile Endpoints
+--------------------------------
+GET     {Base URL}ems/emp-basic-profiles/page=<page-number>&page_size=<page-size>
+GET     {Base URL}ems/emp-basic-profiles/?search=<term>
+POST    {Base URL}ems/emp-basic-profiles/
+GET     {Base URL}ems/emp-basic-profiles/{id}/
+PATCH   {Base URL}ems/emp-basic-profiles/{id}/
+DELETE  {Base URL}ems/emp-basic-profiles/{id}/
+
+Employee Address Details Endpoints
+----------------------------------
+GET     {Base URL}ems/emp-address-details/
+POST    {Base URL}ems/emp-address-details/
+GET     {Base URL}ems/emp-address-details/{employee_id}/
+PATCH   {Base URL}ems/emp-address-details/{employee_id}/
+DELETE  {Base URL}ems/emp-address-details/{employee_id}/
+
+Employee Bank Details Endpoints
+-------------------------------
+GET     {Base URL}ems/emp-bank-details/
+POST    {Base URL}ems/emp-bank-details/
+GET     {Base URL}ems/emp-bank-details/{employee_id}/
+PATCH   {Base URL}ems/emp-bank-details/{employee_id}/
+DELETE  {Base URL}ems/emp-bank-details/{employee_id}/
+
+Employee Nominee Details Endpoints
+----------------------------------
+GET     {Base URL}ems/emp-nominee-details/
+POST    {Base URL}ems/emp-nominee-details/
+GET     {Base URL}ems/emp-nominee-details/{employee_id}/
+PATCH   {Base URL}ems/emp-nominee-details/{employee_id}/
+DELETE  {Base URL}ems/emp-nominee-details/{employee_id}/
+
+Employee Official Information Endpoints
+---------------------------------------
+GET     {Base URL}ems/emp-official-info/
+POST    {Base URL}ems/emp-official-info/
+GET     {Base URL}ems/emp-official-info/{employee_id}/
+PATCH   {Base URL}ems/emp-official-info/{employee_id}/
+DELETE  {Base URL}ems/emp-official-info/{employee_id}/
+
+Dealer Endpoints
+---------------------------------------
+
+GET     {Base URL}ems/dealers/
+POST    {Base URL}ems/dealers/
+GET     {Base URL}ems/dealers/?search=<term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}ems/dealers/<id>/
+PATCH   {Base URL}ems/dealers/<id>/
+DELETE  {Base URL}ems/dealers/<id>/
+
+SubDealer Endpoint
+---------------------------------------
+
+GET     {Base URL}ems/subdealers/
+POST    {Base URL}ems/subdealers/
+GET     {Base URL}ems/subdealers/?search=<term>&page=<page-number>&page_size=<page-size>
+GET     {Base URL}ems/subdealers/<id>/
+PATCH   {Base URL}ems/subdealers/<id>/
+DELETE  {Base URL}ems/subdealers/<id>/
+
+
+==============================
+Dedup API Endpoints
+==============================
+
+Search Customers by Address and Zipcode 
+-------------------------------------------------------
+
+post     {Base URL}dedup/customers/search-by-address/
+
+Loan Account Remark  
+-------------------
+POST    {Base URL}dedup/loan-account-remarks/
+
+
+Get All Remarks (with Optional Search)
+-------------------
+GET     {Base URL}dedup/loan-account-remarks/
+GET     {Base URL}dedup/loan-account-remarks/?search=<loan_account | loan_id | remark>
+
+
+Dedup Logs  
+----------
+GET     {Base URL}dedup/logs/
+GET     {Base URL}dedup/logs/?search=<method | endpoint | uniqid>
+GET     {Base URL}dedup/logs/count/
+GET     {Base URL}dedup/logs/?from_date=2025-07-01&to_date=2025-07-15
+
+
+Download All Logs (Without Pagination)
+--------------------------------------
+GET     {Base URL}dedup/logs/download-all/
+GET     {Base URL}dedup/logs/download-all/?from_date=<YYYY-MM-DD>&to_date=<YYYY-MM-DD>
+
+
+Master Remarks
+GET {Base URL}dedup/master-remarks/ — Get all master remarks
+POST {Base URL}dedup/master-remarks/ — Create a new master remark
+GET {Base URL}dedup/master-remarks/<int:pk>/ — Get details of a specific master remark
+patch {Base URL}dedup/master-remarks/<int:pk>/ — Update a master remark
+DELETE {Base URL}dedup/master-remarks/<int:pk>/ — Delete a master remark
+
+
+
+ENQUIRY URL
+-------------------------------------
+:white_check_mark: Enquiry API Endpoints
+POST    {Base URL}lead/enquiries/
+GET     {Base URL}lead/enquiries/
+GET     {Base URL}lead/enquiries/{id}/
+GET     {Base URL}lead/enquiries/?count_only=true
+GET     {Base URL}lead/enquiries/?page=1&page_size=10
+
+:arrows_counterclockwise: Multi-Step Enquiry Subroutes
+
+POST    {Base URL}lead/enquiries/{id}/address/
+POST    {Base URL}lead/enquiries/{id}/loan_details/
+POST    {Base URL}lead/enquiries/{id}/verification/
+POST    {Base URL}lead/enquiries/{id}/otp_verification/
+POST    {Base URL}lead/enquiries/{id}/skip_verification/
+POST    {Base URL}lead/enquiries/{id}/images/
+POST    {Base URL}lead/enquiries/{id}/selfie/
+----------------------------------------------------

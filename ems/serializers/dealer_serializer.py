@@ -1,0 +1,10 @@
+from rest_framework import serializers
+from ems.models import Dealer
+
+
+class DealerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dealer
+        fields = "__all__"
+        read_only_fields = ["created_by", "created_at", "updated_by", "updated_at", "deleted_by", "deleted_at"]
+

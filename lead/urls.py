@@ -1,0 +1,51 @@
+from django.urls import path
+
+from lead.views.nature_of_business_views import NatureOfBusinessListCreateView, NatureOfBusinessDetailView
+from lead.views.product_type_views import ProductTypeListCreateView, ProductTypeDetailView
+from lead.views.property_type_views import PropertyTypeListCreateView, PropertyTypeDetailView
+from lead.views.property_document_views import PropertyDocumentListCreateView, PropertyDocumentDetailView
+from lead.views.loan_amount_range_views import LoanAmountRangeListCreateView, LoanAmountRangeDetailView
+
+from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView, EnquiryExistingDataAPIView
+from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
+from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
+from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView
+from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView
+from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView
+
+from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
+
+urlpatterns = [
+
+    path("nature-of-businesses/", NatureOfBusinessListCreateView.as_view(), name="nature-of-business-list-create"),
+    path("nature-of-businesses/<int:pk>/", NatureOfBusinessDetailView.as_view(), name="nature-of-business-detail"),
+
+    path("product-types/", ProductTypeListCreateView.as_view(), name="product-type-list-create"),
+    path("product-types/<int:pk>/", ProductTypeDetailView.as_view(), name="product-type-detail"),
+
+    path("property-types/", PropertyTypeListCreateView.as_view(), name="property-type-list-create"),
+    path("property-types/<int:pk>/", PropertyTypeDetailView.as_view(), name="property-type-detail"),
+
+    path("property-documents/", PropertyDocumentListCreateView.as_view(), name="property-document-list-create"),
+    path("property-documents/<int:pk>/", PropertyDocumentDetailView.as_view(), name="property-document-detail"),
+
+    path("loan-amount-ranges/", LoanAmountRangeListCreateView.as_view(), name="loan-amount-range-list-create"),
+    path("loan-amount-ranges/<int:pk>/", LoanAmountRangeDetailView.as_view(), name="loan-amount-range-detail"),
+
+    path("enquiries/", EnquiryListCreateAPIView.as_view(), name="enquiry-list-create"),
+    path("enquiries/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry-detail"),
+    path("enquiries/<int:enquiry_id>/address/", EnquiryAddressCreateAPIView.as_view(), name="enquiry-address-create"),
+    path("enquiries/<int:enquiry_id>/loan_details/", EnquiryLoanDetailsCreateAPIView.as_view(), name="enquiry-loan-details-create"),
+    path("enquiries/<int:enquiry_id>/images/", EnquiryImagesCreateAPIView.as_view(), name="enquiry-images-create"),
+    path("enquiries/<int:enquiry_id>/selfie/", EnquirySelfieCreateAPIView.as_view(), name="enquiry-selfie-create"),
+    path("enquiries/<int:enquiry_id>/verification/", EnquiryVerificationCreateAPIView.as_view(), name="enquiry-verification-create"),
+    path("enquiries/<int:enquiry_id>/otp_verification/", otpVerificationAPIView.as_view(), name="opt-verification"),
+    # path("enquiries/<int:enquiry_id>/skip_verification/", SkipMobileOtpAPIView.as_view(), name="skip-verification"),
+    path("enquiries/existing-data/", EnquiryExistingDataAPIView.as_view(), name="enquiry-existing-data"),
+
+    path("configruation/", ConfigurationListCreateAPIView.as_view(), name="configruation-list-create"),
+    path("configruation/<int:pk>/", ConfigurationDetailAPIView.as_view(), name="configruation-detail"),
+
+
+
+]

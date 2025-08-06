@@ -7,14 +7,14 @@ from ems.models.emp_basic_profile import TblEmpBasicProfile
 
 
 class TblUserMiniSerializer(serializers.ModelSerializer):
-    branch_name = serializers.CharField(source="branch.branch_name", read_only=True)
+    branch_name = serializers.CharField(source="branch_id.branch_name", read_only=True)
     department_name = serializers.CharField(
-        source="department.department_name", read_only=True
+        source="department_id.department_name", read_only=True
     )
     designation_name = serializers.CharField(
-        source="designation.designation_name", read_only=True
+        source="designation_id.designation_name", read_only=True
     )
-    role_name = serializers.CharField(source="role.role_name", read_only=True)
+    role_name = serializers.CharField(source="role_id.role_name", read_only=True)
 
     class Meta:
         model = TblUser

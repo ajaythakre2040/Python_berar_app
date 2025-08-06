@@ -41,7 +41,7 @@ class TblEmpOfficialInformation(models.Model):
         related_name="reporting_employees",
     )
     employment_status = models.IntegerField(null=True, blank=True)
-    remarks = models.TextField(null=True, blank=True)  # <-- Ye field wapas add karo
+    remarks = models.TextField(null=True, blank=True)  
 
     profile_photo = models.ImageField(
         upload_to=upload_to_profile_photo, null=True, blank=True

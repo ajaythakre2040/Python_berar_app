@@ -4,6 +4,9 @@ from django.db import DatabaseError
 
 from auth_system.models.login_session import LoginSession
 from auth_system.models.user import TblUser
+from rest_framework_simplejwt.settings import api_settings
+
+refresh_token_lifetime = api_settings.REFRESH_TOKEN_LIFETIME
 
 
 def create_login_session(
@@ -14,14 +17,12 @@ def create_login_session(
     from django.utils import timezone
     import traceback
 
-  
     try:
         user = TblUser.objects.get(id=user_id)
-       
 
         # Truncate token gently
         if len(token) > 1024:
-            
+
             token = token[:1024]
 
         session = LoginSession.objects.create(
@@ -34,8 +35,9 @@ def create_login_session(
             login_at=timezone.now(),
             created_at=timezone.now(),
             is_active=True,
+            expiry_at=timezone.now() + refresh_token_lifetime,
         )
-        
+
         return session
 
     except Exception as e:

@@ -38,19 +38,25 @@ class TblUser(AbstractBaseUser, PermissionsMixin):
     # branch_id = models.IntegerField(default=0)
     # department_id = models.IntegerField(default=0)
     # designation_id = models.IntegerField(default=0)
-    branch = models.ForeignKey(
+    branch_id = models.ForeignKey(
         "ems.TblBranch", on_delete=models.SET_NULL, null=True, db_column="branch_id"
     )
 
-    department = models.ForeignKey(
-        "ems.TblDepartment", on_delete=models.SET_NULL, null=True, db_column="department_id"
+    department_id = models.ForeignKey(
+        "ems.TblDepartment",
+        on_delete=models.SET_NULL,
+        null=True,
+        db_column="department_id",
     )
 
-    designation = models.ForeignKey(
-        "ems.TblDesignation", on_delete=models.SET_NULL, null=True, db_column="designation_id"
+    designation_id = models.ForeignKey(
+        "ems.TblDesignation",
+        on_delete=models.SET_NULL,
+        null=True,
+        db_column="designation_id",
     )
 
-    role = models.ForeignKey(
+    role_id = models.ForeignKey(
         "ems.Role", on_delete=models.SET_NULL, null=True, db_column="role_id"
     )
     level = models.IntegerField(default=0)

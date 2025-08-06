@@ -33,21 +33,6 @@ def otp_expiry_time(minutes=5):
     return timezone.now() + timedelta(minutes=minutes)
 
 
-# def validate_password(password):
-#     import re
-
-#     if len(password) < 8:
-#         return False
-#     if not re.search(r"[A-Z]", password):
-#         return False
-#     if not re.search(r"[a-z]", password):
-#         return False
-#     if not re.search(r"\d", password):
-#         return False
-#     if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-#         return False
-#     return True
-
 
 def validate_password(password):
     errors = []

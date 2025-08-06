@@ -86,7 +86,7 @@ class LoginView(APIView):
         login_portal = data.get("portal_id", 1)  
        
         ip_address, agent_browser = get_client_ip_and_agent(request)
-
+        print(f"IP Address: {ip_address}, Agent Browser: {agent_browser}")
 
         if not all([username, password]):
             return Response(
@@ -297,9 +297,8 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.data.get("refresh")
         access_token = str(request.auth)
-        ip_address = request.data.get("ip_address")
-        agent_browser = request.data.get("agent_browser")
-
+        ip_address, agent_browser = get_client_ip_and_agent(request)
+       
         if not all([refresh_token, ip_address, agent_browser]):
             return Response(
                 {"message": "Refresh token, IP address, and user agent are required."},

@@ -47,7 +47,6 @@ ADMIN_NOMINEE_DETAILS = {
 }
 
 ADMIN_OFFICIAL_INFO = {
-    "reporting_to": ADMIN_EMPLOYEE_ID,
     "employment_status": 1,
     "created_by": ADMIN_EMPLOYEE_ID,
 }

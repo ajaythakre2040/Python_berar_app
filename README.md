@@ -120,7 +120,7 @@ Load them in settings.py with python-decouple or os.environ.
 
 ------------------------
 
-API Endpoints
+API EndpointsF
 
 - GET /api/test/  
   Returns: {"message": "Main test API is working ✅"}

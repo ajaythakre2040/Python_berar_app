@@ -100,7 +100,7 @@ WSGI_APPLICATION = "berar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db_berar_app",
+        "NAME": "db_berar_app1",
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",

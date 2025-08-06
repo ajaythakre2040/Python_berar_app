@@ -110,7 +110,9 @@ class APILogMiddleware(MiddlewareMixin):
                 if token:
                     try:
                         decoded = jwt.decode(token, options={"verify_signature": False})
-                        portal_id = decoded.get("portal_id")
+                        # portal_id = decoded.get("portal_id")
+                        portal_id = int(decoded.get("portal_id") or 0)
+
                         app_name = next(
                             (
                                 key.lower()

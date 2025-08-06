@@ -17,7 +17,8 @@ class GetAllDedupLogsView(APIView):
         to_date = request.query_params.get("to_date", "").strip()
 
         logs = APILog.objects.filter(method="POST").exclude(
-            endpoint__iexact="/api/dedup/master-remarks/"
+            Q(endpoint__iexact="/api/dedup/master-remarks/") |
+            Q(endpoint__iexact="/api/auth_system/logout/")
         )
 
         if from_date and to_date:

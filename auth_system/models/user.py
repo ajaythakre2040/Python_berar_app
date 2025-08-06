@@ -34,10 +34,7 @@ class TblUser(AbstractBaseUser, PermissionsMixin):
     mobile_number = models.CharField(max_length=15, unique=True, db_index=True)
     employee_id = models.IntegerField(unique=True)
     employee_code = models.CharField(max_length=100, null=True, blank=True)
-    # role_id = models.IntegerField(default=0)
-    # branch_id = models.IntegerField(default=0)
-    # department_id = models.IntegerField(default=0)
-    # designation_id = models.IntegerField(default=0)
+    
     branch_id = models.ForeignKey(
         "ems.TblBranch", on_delete=models.SET_NULL, null=True, db_column="branch_id"
     )

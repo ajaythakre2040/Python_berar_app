@@ -41,15 +41,15 @@ from constants import (
     DeliveryStatus,
     MAX_LOGIN_ATTEMPTS,
     LOGIN_PORTALS,
-    LEAD
+    LEAD,
 )
 import re
 from auth_system.utils.otp_utils import send_login_otp
 from auth_system.utils.common import get_client_ip_and_agent
 
+
 class UserListCreateView(APIView):
     permission_classes = [AllowAny]
-    
 
     def get(self, request):
         users = TblUser.objects.filter(is_deleted=False).order_by("id")
@@ -64,14 +64,25 @@ class UserListCreateView(APIView):
 
     def post(self, request):
         serializer = TblUserSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"message": "User registered successfully."},
+                {
+                    "status": "success",
+                    "status_code": status.HTTP_201_CREATED,
+                    "message": "User registered successfully.",
+                },
                 status=status.HTTP_201_CREATED,
             )
+
         return Response(
-            {"message": "Registration failed.", "errors": serializer.errors},
+            {
+                "status": "error",
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "message": "Registration failed.",
+                "errors": serializer.errors,
+            },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -83,33 +94,51 @@ class LoginView(APIView):
         data = request.data
         username = data.get("username")
         password = data.get("password")
-        login_portal = data.get("portal_id", 1)  
-       
+        login_portal = data.get("portal_id", 1)
+
         ip_address, agent_browser = get_client_ip_and_agent(request)
         print(f"IP Address: {ip_address}, Agent Browser: {agent_browser}")
 
         if not all([username, password]):
             return Response(
-                {"message": "username and password are required."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "username and password are required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = self._get_user(username)
         if not user:
             return Response(
-                {"message": "Incorrect username."}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Incorrect username.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if user.login_attempt >= MAX_LOGIN_ATTEMPTS:
             return Response(
-                {"message": "Account locked. Try later."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_403_FORBIDDEN,
+                    "message": "Account locked. Try later.",
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         if not check_password(password, user.password):
             self._log_failed_attempt(user, username, ip_address, agent_browser)
             return Response(
-                {"message": "Incorrect password."}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Incorrect password.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         user.login_attempt = 0
@@ -133,8 +162,10 @@ class LoginView(APIView):
 
             return Response(
                 {
-                    "status": "",
+                    "status": "success",
+                    "status_code": status.HTTP_200_OK,
                     "message": "Login successful.",
+                    "empoyee_id": user.employee_id,
                     "accessToken": access_token,
                     "refreshToken": refresh_token,
                 },
@@ -145,10 +176,11 @@ class LoginView(APIView):
         return Response(
             {
                 "status": "success",
+                "status_code": status.HTTP_200_OK,
                 "message": "OTP sent successfully.",
                 "user": user.id,
                 "accessToken": False,
-                "request_id" : request_id,
+                "request_id": request_id,
                 "otp_expire": expiry,
             },
             status=status.HTTP_200_OK,
@@ -185,49 +217,76 @@ class TwoFactorVerifyView(APIView):
     def post(self, request):
         user_id = request.data.get("user_id")
         otp_code = request.data.get("otp_code")
-        login_portal = request.data.get("portal_id", 1)  
+        login_portal = request.data.get("portal_id", 1)
         ip_address, agent_browser = get_client_ip_and_agent(request)
         request_id = request.data.get("request_id")
 
         if not user_id or not otp_code or not request_id:
             return Response(
-                {"message": "user_id and otp_code and request_id are required."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "user_id, otp_code and request_id are required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if login_portal not in LOGIN_PORTALS.values():
             return Response(
-                {"message": "Invalid portal_id provided."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Invalid portal_id provided.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
         try:
             user = TblUser.objects.get(id=user_id)
         except TblUser.DoesNotExist:
             return Response(
-                {"message": "User not found."}, status=status.HTTP_404_NOT_FOUND
+                {
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "User not found.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
 
-        otp_record = OTP.objects.filter(user_id=user_id,request_id=request_id).order_by("-id").first()
+        otp_record = (
+            OTP.objects.filter(user_id=user_id, request_id=request_id)
+            .order_by("-id")
+            .first()
+        )
 
         if not otp_record:
             return Response(
-                {"message": "OTP not found for this request ID."},
+                {
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "OTP not found for this request ID.",
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if otp_record.status != DeliveryStatus.PENDING:
             return Response(
-                {"message": "OTP already used or invalid."},
+                {
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "OTP already used or invalid.",
+                },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         if otp_record.otp_code != otp_code:
             return Response(
-                {"message": "Incorrect OTP."}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Incorrect OTP.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
         if timezone.now() > otp_record.expiry_at:
             return Response(
-                {"message": "OTP has expired."}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "OTP has expired.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         otp_record.status = DeliveryStatus.VERIFIED
@@ -250,7 +309,8 @@ class TwoFactorVerifyView(APIView):
 
         return Response(
             {
-                "status": "success",
+                "status_code": status.HTTP_200_OK,
+                "success": True,
                 "message": "OTP verified successfully.",
                 "accessToken": tokens["access"],
                 "refreshToken": tokens["refresh"],
@@ -266,23 +326,35 @@ class ResendOTPView(APIView):
         user_id = request.data.get("user_id")
         if not user_id:
             return Response(
-                {"message": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "User ID is required.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
         try:
             user = TblUser.objects.get(id=user_id)
         except TblUser.DoesNotExist:
             return Response(
-                {"message": "User not found."}, status=status.HTTP_404_NOT_FOUND
+                {
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "User not found.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
         if not user.mobile_number:
             return Response(
-                {"message": "Mobile number not associated with user."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Mobile number not associated with user.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         otp_code, expiry = send_login_otp(user)
         return Response(
             {
+                "status_code": status.HTTP_200_OK,
                 "status": "success",
                 "message": "OTP resent successfully.",
                 "otp_expire": expiry,
@@ -298,10 +370,13 @@ class LogoutView(APIView):
         refresh_token = request.data.get("refresh")
         access_token = str(request.auth)
         ip_address, agent_browser = get_client_ip_and_agent(request)
-       
+
         if not all([refresh_token, ip_address, agent_browser]):
             return Response(
-                {"message": "Refresh token, IP address, and user agent are required."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Refresh token, IP address, and user agent are required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -318,7 +393,10 @@ class LogoutView(APIView):
 
         if not session:
             return Response(
-                {"message": "Invalid session details. Logout denied."},
+                {
+                    "status_code": status.HTTP_403_FORBIDDEN,
+                    "message": "Invalid session details. Logout denied.",
+                },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -335,7 +413,7 @@ class LogoutView(APIView):
 
             session.logout_at = timezone.now()
             session.is_active = False
-            
+
             session.save()
 
             userData = TblUser.objects.filter(id=request.user.id).first()
@@ -345,14 +423,18 @@ class LogoutView(APIView):
 
             return Response(
                 {
-                    "message": "Logout successful. Session closed and tokens blacklisted."
+                    "status_code": status.HTTP_200_OK,
+                    "message": "Logout successful. Session closed and tokens blacklisted.",
                 },
                 status=status.HTTP_200_OK,
             )
 
         except Exception as e:
             return Response(
-                {"message": f"Error: {str(e)}"},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": f"Error: {str(e)}",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -368,19 +450,28 @@ class LeadLoginView(APIView):
 
         if not mobile_number or not re.match(r"^\+?[0-9]{10,15}$", mobile_number):
             return Response(
-                {"message": "Invalid mobile number format."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Invalid mobile number format.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         if not mobile_number:
             return Response(
-                {"message" : "mobile number is required."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "mobile number is required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         if portal_id not in LOGIN_PORTALS.values():
             return Response(
-                {"message": "Invalid portal_id provided."},
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Invalid portal_id provided.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -388,22 +479,27 @@ class LeadLoginView(APIView):
 
         if not user:
             return Response(
-                {"message": "Incorrect mobile number."}, status=status.HTTP_401_UNAUTHORIZED
+                {
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Incorrect mobile number.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         otp_code, expiry, request_id = send_login_otp(user)
 
         return Response(
             {
+                "status_code": status.HTTP_200_OK,
                 "status": "success",
-                "message": "OTP sent successfuly.",
+                "message": "OTP sent successfully.",
                 "user": user.id,
-                "portal_id":portal_id,
-                "request_id" : request_id,
-                "opt_code":otp_code
+                "portal_id": portal_id,
+                "request_id": request_id,
+                "otp_code": otp_code,
+                "otp_expire": expiry,
             },
-
-            status = status.HTTP_200_OK,
+            status=status.HTTP_200_OK,
         )
 
     def _get_user(self, mobile_number):
@@ -421,19 +517,26 @@ class LeadTwoFactorVerifyView(APIView):
         request_id = data.get("request_id")
         otp_code = data.get("otp_code")
         login_portal = data.get("portal_id")
-       
+
         ip_address, agent_browser = get_client_ip_and_agent(request)
-       
 
         if not user_id or not otp_code or not request_id or not login_portal:
             return Response(
-                {"message": "user_id, request_id and otp_code are required."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "user_id, request_id, otp_code, and portal_id are required.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if login_portal not in LOGIN_PORTALS.values():
             return Response(
-                {"message": "Invalid portal_id provided."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Invalid portal_id provided.",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -441,58 +544,82 @@ class LeadTwoFactorVerifyView(APIView):
             user = TblUser.objects.get(id=user_id)
         except TblUser.DoesNotExist:
             return Response(
-                {"message": "User not found."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "User not found.",
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        otp_record = OTP.objects.filter(user_id=user_id, request_id=request_id).order_by("-id").first()
+        otp_record = (
+            OTP.objects.filter(user_id=user_id, request_id=request_id)
+            .order_by("-id")
+            .first()
+        )
 
         if not otp_record:
             return Response(
-                {"message": "OTP not found for this request ID."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                    "message": "OTP not found for this request ID.",
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if otp_record.status != DeliveryStatus.PENDING:
             return Response(
-                {"message": "OTP already used or invalid."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "OTP already used or invalid.",
+                },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if otp_record.otp_code != otp_code:
             return Response(
-                {"message": "Incorrect OTP."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Incorrect OTP.",
+                },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if timezone.now() > otp_record.expiry_at:
             return Response(
-                {"message": "OTP has expired."},
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "OTP has expired.",
+                },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        
         otp_record.status = DeliveryStatus.VERIFIED
         otp_record.verified_at = timezone.now()
         otp_record.save()
-        
+
         user.is_login = True
         user.login_attempt = 0
         user.save()
-        
+
         tokens = generate_token(user, portal_id=login_portal)
-        
+
         create_login_session(
-                user_id=user.id,
-                login_portal=login_portal,
-                token=tokens["access"],
-                ip_address=ip_address,
-                agent_browser=agent_browser,
-                headers=request.headers,
-            )
+            user_id=user.id,
+            login_portal=login_portal,
+            token=tokens["access"],
+            ip_address=ip_address,
+            agent_browser=agent_browser,
+            headers=request.headers,
+        )
         return Response(
             {
                 "status": "success",
+                "status_code": status.HTTP_200_OK,
                 "message": "OTP verified successfully.",
                 "accessToken": tokens["access"],
                 "refreshToken": tokens["refresh"],

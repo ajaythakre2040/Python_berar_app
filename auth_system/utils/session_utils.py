@@ -20,7 +20,7 @@ def create_login_session(
     try:
         user = TblUser.objects.get(id=user_id)
 
-        # Truncate token gently
+        
         if len(token) > 1024:
 
             token = token[:1024]

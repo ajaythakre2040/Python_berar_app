@@ -57,6 +57,7 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "session-key",
+    "x-forwarded-for",
 ]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -100,20 +101,12 @@ WSGI_APPLICATION = "berar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db_berar_app1",
+        "NAME": "db_berar_app",
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",
         "PORT": "5432",
     },
-    # 'second_db': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'second_db',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'password',
-    #     'HOST': 'localhost',
-    #     'PORT': '5432',
-    # },
 }
 
 REST_FRAMEWORK = {
@@ -123,8 +116,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
-        "auth_system.permissions.token_valid.IsTokenValid",  
-        #  "auth_system.permissions.session_timeout.InactiveSessionTimeoutPermission",  
+        "auth_system.permissions.token_valid.IsTokenValid",
+        #  "auth_system.permissions.session_timeout.InactiveSessionTimeoutPermission",
     ),
 }
 

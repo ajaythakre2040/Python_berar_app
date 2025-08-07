@@ -13,12 +13,12 @@ LAST_ACTIVITY_UPDATE_THRESHOLD = timedelta(
 class PortalJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
         user_auth_tuple = super().authenticate(request)
+        print(user_auth_tuple)
         if user_auth_tuple is None:
             return None
 
         user, validated_token = user_auth_tuple
 
-        
         now_time = now()
         if (
             not user.last_activity
@@ -27,7 +27,6 @@ class PortalJWTAuthentication(JWTAuthentication):
             user.last_activity = now_time
             user.save(update_fields=["last_activity"])
 
-        
         path_parts = request.path.strip("/").split("/")
         if len(path_parts) < 2:
             raise AuthenticationFailed("Invalid API path. Access denied.")

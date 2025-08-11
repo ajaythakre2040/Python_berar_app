@@ -97,7 +97,7 @@ class LoginView(APIView):
         login_portal = data.get("portal_id", 1)
 
         ip_address, agent_browser = get_client_ip_and_agent(request)
-        print(f"IP Address: {ip_address}, Agent Browser: {agent_browser}")
+        
 
         if not all([username, password]):
             return Response(
@@ -181,6 +181,7 @@ class LoginView(APIView):
                 "user": user.id,
                 "accessToken": False,
                 "request_id": request_id,
+                'two_step': True,
                 "otp_expire": expiry,
             },
             status=status.HTTP_200_OK,

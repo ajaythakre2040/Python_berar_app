@@ -32,24 +32,9 @@ class CustomerByAddressZipcodeView(APIView):
         response = call_mis_api(
             request, CUSTOMER_SEARCH_BY_ADDRESS_URL, params=params, timeout=30
         )
-
-        result = response.data
-
-        inner_data = result.get("data", {}).get("data", [])
-        message = result.get("data", {}).get(
-            "message", result.get("message", "Success")
-        )
-        status_code = result.get("status_code", response.status_code)
-
-        return Response(
-            {
-                "success": result.get("success", False),
-                "status_code": status_code,
-                "message": message,
-                "data": inner_data,
-            },
-            status=response.status_code,
-        )
+        return response
+       
+        
 
 
 class LoanAccountRemarkView(APIView):

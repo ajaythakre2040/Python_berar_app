@@ -11,9 +11,10 @@ from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
 from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
 from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView
 from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView
-from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView
+from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView,EnquiryVerificationCompleteAPIView
 
 from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
+from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView
 
 urlpatterns = [
 
@@ -40,12 +41,18 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/selfie/", EnquirySelfieCreateAPIView.as_view(), name="enquiry-selfie-create"),
     path("enquiries/<int:enquiry_id>/verification/", EnquiryVerificationCreateAPIView.as_view(), name="enquiry-verification-create"),
     path("enquiries/<int:enquiry_id>/otp_verification/", otpVerificationAPIView.as_view(), name="opt-verification"),
+    path("enquiries/<int:enquiry_id>/verification/complete/", EnquiryVerificationCompleteAPIView.as_view(), name="enquiry-verification-complete"),
+
     # path("enquiries/<int:enquiry_id>/skip_verification/", SkipMobileOtpAPIView.as_view(), name="skip-verification"),
     path("enquiries/existing-data/", EnquiryExistingDataAPIView.as_view(), name="enquiry-existing-data"),
 
     path("configruation/", ConfigurationListCreateAPIView.as_view(), name="configruation-list-create"),
     path("configruation/<int:pk>/", ConfigurationDetailAPIView.as_view(), name="configruation-detail"),
 
-
+    path('enquiries/followup/', EnquiryFollowUpCountAPIView.as_view(), name='enquiry-followup'),
+    path('enquiries/followup/update/', FollowUpUpdateAPIView.as_view(), name='enquiry-followup-update'),
+    path("enquiries/active/", ActiveEnquiriesAPIView.as_view(), name="active-enquiries"),
+    path("enquiries/closed/", ClosedEnquiriesAPIView.as_view(), name="closed-enquiries"),
+    path("enquiries/<int:enquiry_id>/reopen/", ReopenEnquiryView.as_view(), name="reopen-enquiry"),
 
 ]

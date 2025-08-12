@@ -8,6 +8,8 @@ import re
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import CommonPasswordValidator
 
+from lead.models.lead_logs import LeadLog
+
 User = get_user_model()
 
 
@@ -31,7 +33,6 @@ def token_expiry_time(minutes=30):
 
 def otp_expiry_time(minutes=5):
     return timezone.now() + timedelta(minutes=minutes)
-
 
 
 def validate_password(password):
@@ -74,3 +75,13 @@ def get_client_ip_and_agent(request):
     )
     agent = request.META.get("HTTP_USER_AGENT", "Unknown")
     return ip, agent
+
+
+def create_lead_log(enquiry, status, user_id, remark=None, followup_pickup_date=None):
+    return LeadLog.objects.create(
+        enquiry=enquiry,
+        status=status,
+        remark=remark,
+        followup_pickup_date=followup_pickup_date,
+        created_by=user_id,
+    )

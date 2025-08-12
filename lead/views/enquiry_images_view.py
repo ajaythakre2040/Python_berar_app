@@ -10,6 +10,7 @@ from auth_system.permissions.token_valid import IsTokenValid
 from lead.models import Enquiry
 from constants import PercentageStatus
 from django.utils import timezone
+from lead.models.lead_logs import LeadLog  
 
 class EnquiryImagesCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -27,6 +28,12 @@ class EnquiryImagesCreateAPIView(APIView):
                     enquiry.updated_by = request.user.id
                     enquiry.updated_at = timezone.now()
                     enquiry.save()
+
+                LeadLog.objects.create(
+                    enquiry=enquiry,
+                    status="Enquiry Image Form",
+                    created_by=request.user.id,
+                )
 
                 return Response({
                     "success": True,

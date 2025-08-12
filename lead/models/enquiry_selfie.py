@@ -5,6 +5,7 @@ from django.utils import timezone
 import uuid
 
 def selfies_upload_path(instance, filename):
+    
     ext = filename.split('.')[-1]
     unique_name = uuid.uuid4().hex 
     return f'lead/selfies/enquiry_{instance.enquiry.id}/{unique_name}.{ext}'

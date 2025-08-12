@@ -10,6 +10,7 @@ from auth_system.permissions.token_valid import IsTokenValid
 from lead.models import Enquiry
 from constants import PercentageStatus
 from django.utils import timezone
+from lead.models.lead_logs import LeadLog  
 
 
 class EnquiryAddressCreateAPIView(APIView):
@@ -29,6 +30,11 @@ class EnquiryAddressCreateAPIView(APIView):
                     enquiry.updated_at = timezone.now()
                     enquiry.save()
 
+                    LeadLog.objects.create(
+                        enquiry=enquiry,
+                        status="Enquiry Address Form",
+                        created_by=request.user.id,
+                    )
             
                 return Response(
                     {

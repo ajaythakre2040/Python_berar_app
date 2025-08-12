@@ -12,6 +12,7 @@ from auth_system.models.otp import OTP
 from django.utils import timezone
 from lead.models.enquiry_verifications import EnquiryVerification
 from constants import PercentageStatus
+from lead.models.lead_logs import LeadLog  
 
 from constants import (
         DeliveryStatus,
@@ -19,11 +20,9 @@ from constants import (
 
 from constants import MOBILE_SKIPPED , MOBILE_VERIFIED, EMAIL_SKIPPED ,EMAIL_VERIFIED
 
-
 class EnquiryVerificationCreateAPIView(APIView):
 
     permission_classes = [IsAuthenticated, IsTokenValid]
-
     def post(self, request, enquiry_id):
         print(request)
         enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
@@ -55,7 +54,12 @@ class EnquiryVerificationCreateAPIView(APIView):
                 "message": "Invalid verification channel."
             }, status=status.HTTP_400_BAD_REQUEST)
 
-
+        LeadLog.objects.create(
+                    enquiry=enquiry,
+                    status="Enquiry Verification Form",
+                    created_by=request.user.id,
+                )
+        
         return Response(
         {
             "status": "success",
@@ -67,7 +71,7 @@ class EnquiryVerificationCreateAPIView(APIView):
         )
 
 class otpVerificationAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated, IsTokenValid]
 
     def post(self, request, enquiry_id):
         required_fields = ["user_id", "otp_code", "request_id", "channel", "value"]
@@ -97,7 +101,6 @@ class otpVerificationAPIView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        # Compare OTP after stripping whitespace
         if otp_record.otp_code.strip() != otp_code.strip():
             return Response({"message": "Incorrect OTP."}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -105,12 +108,10 @@ class otpVerificationAPIView(APIView):
         if timezone.now() > otp_record.expiry_at:
             return Response({"message": "OTP has expired."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Mark OTP as verified
         otp_record.status = DeliveryStatus.VERIFIED
         otp_record.verified_at = timezone.now()
         otp_record.save()
 
-        # Update or create enquiry verification record
         verification, created = EnquiryVerification.objects.get_or_create(
             enquiry=enquiry,
             defaults={"created_by": user_id, "created_at": timezone.now()}
@@ -119,96 +120,104 @@ class otpVerificationAPIView(APIView):
         if channel == "mobile":
             verification.mobile = value
             verification.mobile_status = MOBILE_VERIFIED
-            if enquiry.is_steps < PercentageStatus.ENQUIRY_VERIFICATION:
-                enquiry.is_steps = PercentageStatus.ENQUIRY_VERIFICATION
-                enquiry.save()  # <-- Save the update
+           
+            verification.save()  
 
         elif channel == "email":
             verification.email = value
             verification.email_verified = EMAIL_VERIFIED
-            if enquiry.is_steps < PercentageStatus.ENQUIRY_VERIFICATION:
-                enquiry.is_steps = PercentageStatus.ENQUIRY_VERIFICATION
-                enquiry.save()  # <-- Save the update
+           
+            verification.save()  
 
         else:
             return Response({"message": "Invalid channel."}, status=status.HTTP_400_BAD_REQUEST)
 
+        LeadLog.objects.create(
+            enquiry=enquiry,
+            status="Enquiry Verification Success",
+            created_by=request.user.id,
+        )
         return Response(
             {"status": "success", "message": f"{channel.title()} OTP verified and saved."},
             status=status.HTTP_200_OK,
         )
 
-# class otpVerificationAPIView(APIView):
-#     permission_classes = [AllowAny]
-#     def post(self, request, enquiry_id):
-#         enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
 
-#         user_id = request.data.get("user_id")
-#         request_id = request.data.get("request_id")
-#         otp_code = request.data.get("otp_code")
-#         channel = request.data.get("channel")  
-#         value = request.data.get("value")  
 
-#         if not user_id or not otp_code or not request_id or not channel or not value:
-#             return Response(
-#                 {"message": "user_id, otp_code, request_id, channel and value are required."},
-#                 status=status.HTTP_400_BAD_REQUEST,
-#             )
-        
-#         otp_record = OTP.objects.filter(user_id=user_id,request_id=request_id).order_by("-id").first()
+class EnquiryVerificationCompleteAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
 
-#         if not otp_record:
-#             return Response(
-#                 {
-#                     "message":"User not found"
-#                 },
-#                  status=status.HTTP_404_NOT_FOUND
-#             )
-#         if otp_record.status != DeliveryStatus.PENDING:
-#             return Response(
-#                 {"message": "OTP already used or invalid."},
-#                 status=status.HTTP_401_UNAUTHORIZED,
-#             )
-#         if otp_record.otp_code != otp_code:
-#             return Response(
-#                 {"message": "Incorrect OTP."}, status=status.HTTP_401_UNAUTHORIZED
-#             )
-        
-#         if timezone.now() > otp_record.expiry_at:
-#             return Response(
-#                 {"message": "OTP has expired."}, status=status.HTTP_401_UNAUTHORIZED
-#             )
-        
-#         otp_record.status = DeliveryStatus.VERIFIED
-#         otp_record.verified_at = timezone.now()
-#         otp_record.save()
+    def post(self, request, enquiry_id):
+        enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
 
-#         verification, create = EnquiryVerification.objects.get_or_create(
-#             enquiry=enquiry,
-#             defaults={
-#                 "created_by":user_id,
-#                 "created_at":timezone.now()
-#             }
-#         )
-#         if channel == "mobile":
-#             verification.mobile = value
-#             verification.mobile_status = MOBILE_VERIFIED
-#         elif channel == "email":
-#             verification.email = value
-#             verification.email_verified = True
+        data = request.data
+        mobile = data.get("mobile")
+        email = data.get("email")
+        aadhaar = data.get("aadhaar")
 
-#         else:
-#             return Response({
-#                 "message": "Invalid channel"
-#             },status=400)
-        
-#         verification.save()
+        mobile_verified = data.get("mobile_verified", False)
+        email_verified = data.get("email_verified", False)
+        aadhaar_verified = data.get("aadhaar_verified", False)
 
-#         return Response(
-#             {
-#                 "status": "success",
-#                 "message": f"{channel.title()} OTP verified and saved."
-#             },
-#             status=status.HTTP_200_OK,
-#         )
+        user_id = request.user.id
 
+        verification, created = EnquiryVerification.objects.get_or_create(
+            enquiry=enquiry,
+            defaults={
+                "created_by": user_id,
+                "created_at": timezone.now()
+            }
+        )
+
+        if mobile:
+            verification.mobile = mobile
+            verification.mobile_status = MOBILE_VERIFIED if mobile_verified else MOBILE_SKIPPED
+        elif not verification.mobile:
+            verification.mobile = None
+            verification.mobile_status = MOBILE_SKIPPED
+
+        if email:
+            verification.email = email
+            verification.email_verified = EMAIL_VERIFIED if email_verified else EMAIL_SKIPPED
+        elif not verification.email:
+            verification.email = None
+            verification.email_verified = EMAIL_SKIPPED
+
+        if aadhaar:
+            verification.aadhaar = aadhaar
+            verification.aadhaar_verified = aadhaar_verified
+        elif not verification.aadhaar:
+            verification.aadhaar = None
+            verification.aadhaar_verified = False
+
+        verification.updated_by = user_id
+        verification.updated_at = timezone.now()
+        verification.save()
+
+
+        if (
+                verification.mobile_status == MOBILE_VERIFIED or
+                verification.email_verified == EMAIL_VERIFIED or
+                verification.aadhaar_verified is True
+            ):
+               
+
+            if int(enquiry.is_steps) < int(PercentageStatus.ENQUIRY_VERIFICATION):
+                print("✅ Condition passed for verification step update.")
+                enquiry.is_steps = PercentageStatus.ENQUIRY_VERIFICATION
+                enquiry.save()
+            else:
+                print("🔁 Enquiry already at or beyond verification step.")
+        else:
+                print("❌ No verification method passed, skipping step update.")
+
+        LeadLog.objects.create(
+            enquiry=enquiry,
+            status="Enquiry Final Verification Success",
+            created_by=request.user.id,
+        )
+        return Response({
+            "status": "success",
+            "message": "Verification fields updated with verification flags.",
+            "created": created
+        }, status=status.HTTP_200_OK)

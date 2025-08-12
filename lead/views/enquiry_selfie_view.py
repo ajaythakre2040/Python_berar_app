@@ -10,6 +10,7 @@ from auth_system.permissions.token_valid import IsTokenValid
 from constants import PercentageStatus
 from django.utils import timezone
 from constants import EnquiryStatus
+from lead.models.lead_logs import LeadLog  
 
 
 class EnquirySelfieCreateAPIView(APIView):
@@ -44,7 +45,11 @@ class EnquirySelfieCreateAPIView(APIView):
 
                 # Always save if any update happened
                 enquiry.save()
-
+                LeadLog.objects.create(
+                    enquiry=enquiry,
+                    status="Enquiry Selfie Form",
+                    created_by=request.user.id,
+                )
                 return Response({
                     "success": True,
                     "message": "Enquiry selfie saved and enquiry updated.",

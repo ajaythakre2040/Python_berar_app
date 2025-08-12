@@ -9,6 +9,7 @@ from lead.serializers.enquiry_loan_details_serializer import EnquiryLoanDetailsS
 from auth_system.permissions.token_valid import IsTokenValid
 from constants import PercentageStatus
 from django.utils import timezone
+from lead.models.lead_logs import LeadLog  
 
 
 class EnquiryLoanDetailsCreateAPIView(APIView):
@@ -29,6 +30,11 @@ class EnquiryLoanDetailsCreateAPIView(APIView):
                     enquiry.updated_at = timezone.now()
                     enquiry.save()
 
+                    LeadLog.objects.create(
+                        enquiry=enquiry,
+                        status="Enquiry Loan Details Form",
+                        created_by=request.user.id,
+                    )
                 # re-serialize for response (includes 'enquiry', 'loan_type_display', etc.)
                 response_serializer = EnquiryLoanDetailsSerializer(saved_instance)
 

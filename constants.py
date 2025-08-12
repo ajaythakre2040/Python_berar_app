@@ -120,6 +120,7 @@ class OtpType(models.IntegerChoices):
     CUSTOMER_LOGIN = 1, "Customer Login"
     FD_LOGIN = 2, "FD Login"
     EMPLOYEE_LOGIN = 3, "Employee Login"
+    LEAD_VERIFICATION = 4, "Lead Verification"
 
 
 # -----------------------
@@ -129,6 +130,7 @@ class SmsType(models.IntegerChoices):
     CUSTOMER_LOGIN_OTP = 1, "Customer Login OTP"
     FD_LOGIN_OTP = 2, "FD Login OTP"
     EMPLOYEE_LOGIN_OTP = 3, "Employee Login OTP"
+    LEAD_VERIFICATION_OTP = 4, "Lead Verification OTP"
 
 
 # -----------------------
@@ -180,21 +182,24 @@ MAX_LOGIN_ATTEMPTS = 3
 TOKEN_SCOPE_AUTH_SYSTEM = "employee"
 TOKEN_SCOPE_CUSTOMER = "customer"
 
-# Enquiry Verification Status
-MOBILE_PENDING = 0
-MOBILE_VERIFIED = 1
-MOBILE_SKIPPED = 2
 EMAIL_PENDING = 0
 EMAIL_VERIFIED = 1
 EMAIL_SKIPPED = 2
-MOBILE_STATUS_CHOICES = (
-    (MOBILE_PENDING, "Pending"),
-    (MOBILE_VERIFIED, "Verified"),
-    (MOBILE_SKIPPED, "Skipped"),
+EMAIL_STATUS_CHOICES = (
     (EMAIL_PENDING, "Pending"),
     (EMAIL_VERIFIED, "Verified"),
     (EMAIL_SKIPPED, "Skipped"),
 )
+MOBILE_PENDING = 0
+MOBILE_VERIFIED = 1
+MOBILE_SKIPPED = 2
+MOBILE_STATUS_CHOICES = (
+    (MOBILE_PENDING, "Pending"),
+    (MOBILE_VERIFIED, "Verified"),
+    (MOBILE_SKIPPED, "Skipped"),
+)
+
+
 # Occupation
 SALARIED = 1
 SELF_EMPLOYED = 2
@@ -214,7 +219,10 @@ class PercentageStatus(models.IntegerChoices):
 class EnquiryStatus(models.IntegerChoices):
     DRAFT = 0, "Draft"
     SUBMITTED = 1, "Submitted"
-    VERIFIED = 2, "Verified"
+    ACTIVE = 2, "Active"  # or 'Verified' — choose one
+    CLOSED = 3, "Closed"
+    REJECT = 4, "Reject"
+    RE_OPEN = 5, "Re Open"
 
 
 # --- Enquiry Types ---
@@ -233,3 +241,5 @@ TYPE_LOAN_REQUIRED_ON_CHOICES = [
     (TYPE_VEHICLE, "Vehicle"),
     (TYPE_PROPERTY, "Property"),
 ]
+class EmailType(models.IntegerChoices):
+    ENQUIRY_VERIFICATION = 1, "Enquiry Verification OTP"

@@ -2,24 +2,23 @@
 from django.db import models
 from lead.models.product_type import ProductType
 from django.utils import timezone
-from constants import OCCUPATION_CHOICES,SALARIED, SELF_EMPLOYED
+from constants import OCCUPATION_CHOICES
 from constants import PercentageStatus
 from constants import EnquiryStatus
+from ems.models.emp_basic_profile import TblEmpBasicProfile
 
 class Enquiry(models.Model):
 
-    OCCUPATION_CHOICES = (
-        (SALARIED, 'Salaried'),
-        (SELF_EMPLOYED, 'Self-Employed'),
-    )
+
 
     name = models.CharField(max_length=255)
     mobile_number = models.CharField(max_length=15)
     lan_number = models.CharField(max_length=15, null=True, blank=True)
 
     loan_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    occupation = models.CharField(max_length=100, choices=OCCUPATION_CHOICES, null=False)
+    occupation = models.IntegerField(choices=OCCUPATION_CHOICES, null=False,default=1)
+
+    # occupation = models.CharField(max_length=100, choices=OCCUPATION_CHOICES, null=False)
     employer_name = models.CharField(max_length=255, null=True, blank=True)
     number_of_years_service = models.IntegerField(null=True, blank=True)
     official_contact_number = models.CharField(max_length=15, null=True, blank=True)
@@ -38,6 +37,7 @@ class Enquiry(models.Model):
     kyc_number = models.CharField(max_length=50, null=True, blank=True)
     is_steps = models.IntegerField(choices=PercentageStatus.choices, default=PercentageStatus.ENQUIRY_BASIC)    
     is_status = models.IntegerField(choices=EnquiryStatus.choices,default=EnquiryStatus.DRAFT)
+    assign_to = models.ForeignKey(TblEmpBasicProfile, on_delete=models.SET_NULL, null=True, blank=True)
     created_by = models.IntegerField()
     created_at = models.DateTimeField(default=timezone.now)
     updated_by = models.IntegerField(null=True, blank=True, default=0)

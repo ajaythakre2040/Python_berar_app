@@ -11,6 +11,7 @@ from auth_system.utils.pagination import CustomPagination
 from rest_framework.exceptions import NotFound
 from constants import PercentageStatus
 from constants import EnquiryStatus
+from lead.models.lead_logs import LeadLog  
 
 
 class EnquiryListCreateAPIView(APIView):
@@ -28,9 +29,7 @@ class EnquiryListCreateAPIView(APIView):
             )
         else:
             enquiries = Enquiry.objects.filter(deleted_at__isnull=True)
-
         total_count = enquiries.count()
-
         if count_only:
             return Response({
                 "success": True,
@@ -63,8 +62,6 @@ class EnquiryListCreateAPIView(APIView):
                 "data": serializer.data,
             }, status=status.HTTP_200_OK)
 
-   
-            
     def post(self, request):
         serializer = EnquirySerializer(data=request.data)
         if serializer.is_valid():
@@ -75,7 +72,11 @@ class EnquiryListCreateAPIView(APIView):
                     is_steps=PercentageStatus.ENQUIRY_BASIC,
                     is_status=EnquiryStatus.DRAFT,
                 )
-
+                LeadLog.objects.create(
+                    enquiry=enquiry,
+                    status="Basic Enquiry Form",
+                    created_by=request.user.id,
+                )
                 return Response(
                 {
                     "Success": True,
@@ -106,7 +107,6 @@ class EnquiryListCreateAPIView(APIView):
 
 class EnquiryDetailView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
-
     def get_object(self, pk):
         try:
             return Enquiry.objects.select_related(
@@ -134,7 +134,6 @@ class EnquiryDetailView(APIView):
     
 class EnquiryExistingDataAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
-
     def post(self, request):
         mobile = request.data.get("mobile_number")
         lan = request.data.get("lan_number")
@@ -150,9 +149,7 @@ class EnquiryExistingDataAPIView(APIView):
             query &= Q(mobile_number=mobile)
         if lan:
             query &= Q(lan_number=lan)
-
         enquiry = Enquiry.objects.filter(query).order_by("-id").first()
-
         if not enquiry:
             return Response({
                 "success": False,

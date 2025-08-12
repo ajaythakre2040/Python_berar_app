@@ -10,6 +10,7 @@ from .login_session import LoginSession
 from .sms_log import SmsLog
 from .blacklist import BlackListedToken
 from .apilog import APILog
+from .email_logs import EmailLogs
 
 __all__ = [
     "ForgotPassword",
@@ -22,5 +23,6 @@ __all__ = [
     "SmsLog",
     "BlackListedToken",
     "APILog",
+    "EmailLogs",
    
 ]

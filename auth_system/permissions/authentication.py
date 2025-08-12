@@ -13,7 +13,7 @@ LAST_ACTIVITY_UPDATE_THRESHOLD = timedelta(
 class PortalJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
         user_auth_tuple = super().authenticate(request)
-        print(user_auth_tuple)
+        
         if user_auth_tuple is None:
             return None
 

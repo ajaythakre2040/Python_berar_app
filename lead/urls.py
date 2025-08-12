@@ -14,7 +14,7 @@ from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView
 from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView,EnquiryVerificationCompleteAPIView
 
 from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
-from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView
+from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView,LeadAssignView,AllCountAPIView
 
 urlpatterns = [
 
@@ -55,4 +55,7 @@ urlpatterns = [
     path("enquiries/closed/", ClosedEnquiriesAPIView.as_view(), name="closed-enquiries"),
     path("enquiries/<int:enquiry_id>/reopen/", ReopenEnquiryView.as_view(), name="reopen-enquiry"),
 
+    path("enquiries/<int:enquiry_id>/lead_assign/", LeadAssignView.as_view(), name="lead-assign"),
+
+    path("enquiries/all_counts/", AllCountAPIView.as_view(), name="lead-assign"),
 ]

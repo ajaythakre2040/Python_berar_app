@@ -352,7 +352,7 @@ class ResendOTPView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        otp_code, expiry = send_login_otp(user)
+        otp_code, expiry, request_id = send_login_otp(user)
         return Response(
             {
                 "status_code": status.HTTP_200_OK,

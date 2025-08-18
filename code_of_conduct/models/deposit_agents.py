@@ -15,6 +15,9 @@ class DepositAgents(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
     file_status = models.IntegerField(default=0)
 
+    class Meta:
+        db_table = "code_of_conduct_deposit_agents_upload"
+        
     def __str__(self):
         return self.deposit_agents_file
 

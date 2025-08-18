@@ -16,8 +16,8 @@ class Dsa(models.Model):
     file_status = models.IntegerField(default=0)
 
     
-    # class Meta:
-    #     db_table = "dsa"  # This will be the table name in the DB
+    class Meta:
+        db_table = "code_of_conduct_dsa_upload"  # This will be the table name in the DB
 
     def __str__(self):
         return self.dsa_file

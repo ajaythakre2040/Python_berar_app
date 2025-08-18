@@ -82,3 +82,29 @@ def send_enquiry_otp_to_email(email, otp):
     except Exception as e:
         logger.error(f"Failed to send OTP email to {email}: {e}")
         return {"success": False, "error": "Failed to send email", "details": str(e)}
+
+
+
+def send_link(mobile_number, link):
+    url = "http://api.pinnacle.in/index.php/sms/json"
+    headers = {
+        "apikey": API_SMS_KEY,
+        "Content-Type": "application/json",
+        "Cookie": 'DO-LB="MTAuMTM5LjIyMy4xMTA6ODA="; PHPSESSID=1fo6rqls3mecq8ge6e7q6k2mmf',
+    }
+    payload = {
+        "sender": "berarf",
+        "message": [
+            {
+                "number": f"91{mobile_number}",
+                "text": f"Dear User, This is your link {link}. Thank You Berar Finance Limited"
+            }
+        ],
+        "messagetype": "TXT",
+        "dlttempid": "1707170659123947276"
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    try:
+        return response.json()
+    except Exception as e:
+        return {"error": "Invalid response", "content": response.text}

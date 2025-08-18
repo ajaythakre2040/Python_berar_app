@@ -18,7 +18,8 @@ import openpyxl
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Q
-
+from auth_system.utils.common import encrypt_id
+from auth_system.utils.otp_utils import send_link_to_mobile
 
 class DepositAgentsUploadView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -209,4 +210,67 @@ class DepositAgentsDataDetailView(APIView):
         return Response(
             {"success": True, "message": "Deposit agents data deleted successfully."},
             status=status.HTTP_200_OK,
+        )
+    
+
+class SendLink(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def post(self, request, pk):
+        try:
+            deposit_data = DepositAgentsData.objects.get(pk=pk, deleted_at__isnull=True)
+        except DepositAgentsData.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid request",
+                    "errors": f"DepositAgentsData with id {pk} not found",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        # otp_code, expiry = send_login_otp(user)
+
+        encrypted_id = encrypt_id(pk)
+        # Generate the link with the pk
+        url = f"https://uatcws.berarfinance.com/deposit_agents/f1/?{encrypted_id}"
+
+        return Response(
+            {
+                "success": True,
+                "message": "Link generated successfully",
+                "mobile_number": deposit_data.mobile_number,
+                "url": url,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class SendLinkToMobileView(APIView):
+    permission_classes =   [IsAuthenticated, IsTokenValid]
+
+    def post(self, request):
+        
+        mobile_number = request.data.get("mobile_number")
+        link = request.data.get("link")
+
+        if not mobile_number or not link:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid request",
+                    "errors": "mobile_number and link are required",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        api_response  = send_link_to_mobile(request, mobile_number, link)
+        
+        return Response(
+            {
+                "success": True,
+                "message": "SMS sent successfully" if not api_response.get("error") else "SMS sending failed",
+                "sms_api_response": api_response,
+            },
+            status=status.HTTP_200_OK if not api_response.get("error") else status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

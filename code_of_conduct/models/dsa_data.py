@@ -26,8 +26,9 @@ class DsaData(models.Model):
     deleted_by = models.IntegerField(null=True, blank=True, default=0)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    # class Meta:
-    #     db_table = "dsa_data" #This will be the table name in the DB
+    class Meta:
+        db_table = "code_of_conduct_dsa_data"  # This will be the table name in the DB
+
 
     def __str__(self):
         return f"{self.name} | Owner: {self.owner_name} | City: {self.city} | Quarter: {self.quarter_code}"

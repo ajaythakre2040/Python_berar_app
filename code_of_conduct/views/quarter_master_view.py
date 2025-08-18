@@ -60,7 +60,7 @@ class QuarterMasterView(APIView):
                 {
                     "success": True,
                     "message": "QuarterMaster type created successfully.",
-                    "data": response_serializer.data,
+                    # "data": response_serializer.data,
                 },
                 status=status.HTTP_201_CREATED,
             )
@@ -135,7 +135,7 @@ class QuarterMasterDetailView(APIView):
                 {
                     "success": True,
                     "message": "QuarterMaster type updated successfully.",
-                    "data": serializer.data,
+                    # "data": serializer.data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -161,7 +161,7 @@ class QuarterMasterDetailView(APIView):
             {
                 "success": True,
                 "message": "QuarterMaster type deleted successfully.",
-                "data": serializer.data
+                # "data": serializer.data
             },
             status=status.HTTP_200_OK,
         )

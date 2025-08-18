@@ -17,7 +17,9 @@ import openpyxl
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Q
-
+from openpyxl import Workbook
+from django.http import HttpResponse
+from io import BytesIO
 
 
 
@@ -162,6 +164,97 @@ class RasUploadView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
+
+class RasDownloadTemplate(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.title = "Ras Data Template"
+
+        # Headers only — field names
+        headers = [
+            'quarter_code', 'name', 'owner_name', 'from_date', 'to_date',
+            'adhar_number', 'pan_number', 'mobile_number', 'city', 'address'
+        ]
+        worksheet.append(headers)
+
+        excel_file = BytesIO()
+        workbook.save(excel_file)
+        excel_file.seek(0)
+
+        response = HttpResponse(
+            excel_file,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="ras_template.xlsx"'
+
+        return response
+
+
+class RasExportExcelDownload(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        try:
+            data = RasData.objects.filter(deleted_at__isnull=True)
+
+            if not data.exists():
+                return Response({
+                    "success": False,
+                    "message": "No data available to export."
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            workbook = Workbook()
+            worksheet = workbook.active
+            worksheet.title = "Ras Data"
+
+            # Define headers
+            headers = [
+                "ID", "Quarter Code", "Name", "Owner Name", "From Date", "To Date",
+                "Adhar Number", "PAN Number", "Mobile Number", "City", "Address",
+                "Created At", "Created By"
+            ]
+            worksheet.append(headers)
+
+            # Append data rows
+            for item in data:
+                worksheet.append([
+                    item.id,
+                    item.quarter_code,
+                    item.name,
+                    item.owner_name,
+                    item.from_date.strftime("%Y-%m-%d") if item.from_date else "",
+                    item.to_date.strftime("%Y-%m-%d") if item.to_date else "",
+                    item.adhar_number,
+                    item.pan_number,
+                    item.mobile_number,
+                    item.city,
+                    item.address,
+                    item.created_at.strftime("%Y-%m-%d %H:%M:%S") if item.created_at else "",
+                    item.created_by,
+                ])
+
+            # Prepare file to return as HTTP response
+            excel_file = BytesIO()
+            workbook.save(excel_file)
+            excel_file.seek(0)
+
+            response = HttpResponse(
+                excel_file,
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = 'attachment; filename="ras_data.xlsx"'
+
+            return response
+
+        except Exception as e:
+            return Response({
+                "success": False,
+                "message": f"An error occurred during export: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class RasDataDetailView(APIView):

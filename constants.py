@@ -84,7 +84,7 @@ PORTAL_URL_MAP = {
     "cms": LOGIN_PORTALS["CMS"],
     "lead": LOGIN_PORTALS["LEAD"],
     "dedup": LOGIN_PORTALS["DEDUP"],
-    "code-of-conduct": LOGIN_PORTALS["CODE_OF_CONDUCT"],
+    "code_of_conduct": LOGIN_PORTALS["CODE_OF_CONDUCT"],
 }
 # -----------------------
 # Menu Name Constants
@@ -243,3 +243,16 @@ TYPE_LOAN_REQUIRED_ON_CHOICES = [
 ]
 class EmailType(models.IntegerChoices):
     ENQUIRY_VERIFICATION = 1, "Enquiry Verification OTP"
+
+
+# code_of_conduct/constants.py
+class QuestionTypeConstants:
+    DSA = 1
+    RSA = 2
+    DEPOSIT_AGENT = 3
+
+    CHOICES = [
+        (DSA, 'DSA'),
+        (RSA, 'RSA'),
+        (DEPOSIT_AGENT, 'Deposit Agent'),
+    ]

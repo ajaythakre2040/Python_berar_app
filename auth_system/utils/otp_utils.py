@@ -3,7 +3,7 @@ from auth_system.models.email_logs import EmailLogs
 from auth_system.models.otp import OTP
 from auth_system.models.sms_log import SmsLog
 from auth_system.utils.common import generate_otp, otp_expiry_time, generate_request_id
-from auth_system.utils.sms_utils import send_enquiry_otp_to_email
+from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link
 from constants import EmailType, OtpType, SmsType, DeliveryStatus
 
 
@@ -111,3 +111,37 @@ def enquiry_email_otp(email, user_id=None):
         sent_at=timezone.now(),
     )
     return otp_code, expiry, request_id
+
+
+def send_link_to_mobile(request, mobile, link):
+    # api_response = send_link(mobile, link)
+
+    # sms_status = (
+    #     DeliveryStatus.DELIVERED
+    #     if api_response and not api_response.get("error")
+    #     else DeliveryStatus.FAILED
+    # )
+
+    api_response = {
+        "code": 200,
+        "status": "success",
+        "data": [
+            {
+                "mobile": f"91{mobile}",
+                "uniqueid": "dummy_unique_id_123456"
+            }
+        ]
+    }
+
+    sms_status = DeliveryStatus.DELIVERED  # Always mark as delivered for dev
+
+    SmsLog.objects.create(
+        user_id=request.user.id,
+        mobile_number=mobile,
+        message=f"Your Link {link}.",
+        sms_type=SmsType.DEPOSIT_AGENT_SEND_LINK,
+        status=sms_status,
+        sent_at=timezone.now(),
+    )
+
+    return api_response  

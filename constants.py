@@ -84,7 +84,7 @@ PORTAL_URL_MAP = {
     "cms": LOGIN_PORTALS["CMS"],
     "lead": LOGIN_PORTALS["LEAD"],
     "dedup": LOGIN_PORTALS["DEDUP"],
-    "code-of-conduct": LOGIN_PORTALS["CODE_OF_CONDUCT"],
+    "code_of_conduct": LOGIN_PORTALS["CODE_OF_CONDUCT"],
 }
 # -----------------------
 # Menu Name Constants

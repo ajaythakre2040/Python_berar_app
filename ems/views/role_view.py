@@ -23,8 +23,8 @@ class RoleListCreateView(APIView):
         if search_query:
             roles = roles.filter(
                 Q(role_name__icontains=search_query) |
-                Q(role_code__icontains=search_query) |
-                Q(portal_id__icontains=search_query)
+                Q(role_code__icontains=search_query) 
+                
             )
 
         roles = roles.order_by("id")

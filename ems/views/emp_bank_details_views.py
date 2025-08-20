@@ -15,7 +15,7 @@ from auth_system.utils.pagination import CustomPagination
 
 class EmpBankDetailsListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
-
+  
     def get(self, request):
         banks = TblEmpBankDetails.objects.filter(deleted_at__isnull=True).order_by("id")
         paginator = CustomPagination()

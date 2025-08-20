@@ -5,15 +5,13 @@ from datetime import timedelta
 from constants import PORTAL_URL_MAP
 
 SKIP_PORTAL_CHECK_PREFIXES = ["auth_system", "api-docs", "swagger", "redoc"]
-LAST_ACTIVITY_UPDATE_THRESHOLD = timedelta(
-    seconds=30
-)  
+LAST_ACTIVITY_UPDATE_THRESHOLD = timedelta(seconds=30)
 
 
 class PortalJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
         user_auth_tuple = super().authenticate(request)
-        
+
         if user_auth_tuple is None:
             return None
 
@@ -49,5 +47,25 @@ class PortalJWTAuthentication(JWTAuthentication):
             raise AuthenticationFailed(
                 "Permission denied. Token does not match portal access."
             )
+
+        return user, validated_token
+
+
+class SkipPortalCheckJWTAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            return None
+
+        user, validated_token = user_auth_tuple
+
+        now_time = now()
+        if (
+            not user.last_activity
+            or (now_time - user.last_activity) > LAST_ACTIVITY_UPDATE_THRESHOLD
+        ):
+            user.last_activity = now_time
+            user.save(update_fields=["last_activity"])
 
         return user, validated_token

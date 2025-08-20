@@ -131,6 +131,7 @@ class SmsType(models.IntegerChoices):
     FD_LOGIN_OTP = 2, "FD Login OTP"
     EMPLOYEE_LOGIN_OTP = 3, "Employee Login OTP"
     LEAD_VERIFICATION_OTP = 4, "Lead Verification OTP"
+    DEPOSIT_AGENT_SEND_LINK = 5, "Send Link"
 
 
 # -----------------------
@@ -256,3 +257,13 @@ class QuestionTypeConstants:
         (RSA, 'RSA'),
         (DEPOSIT_AGENT, 'Deposit Agent'),
     ]
+
+class LanguageType(models.IntegerChoices):
+    HINDI = 1, "Hindi"
+    ENGLISH = 2, "English"
+    MARATHI = 3, "Marathi"
+    GUJARATI = 4, "Gujarati"
+    TELUGU = 5, "Telugu"
+    KANNADA = 7, "Kannada"
+    TAMIL = 8, "Tamil"
+    

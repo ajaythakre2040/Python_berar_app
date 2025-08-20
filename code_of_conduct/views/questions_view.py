@@ -51,6 +51,8 @@ class QuestionsListCreateView(APIView):
             )
         
     def post(self, request):
+
+        # print('user id chahhiye idhar',request.user.id) 1
         serializer = QuestionsSerializer(data=request.data)
         if serializer.is_valid():
             # Duplicate check manually

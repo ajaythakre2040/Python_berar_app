@@ -50,6 +50,7 @@ urlpatterns = [
     path("deposit_agents_data/<int:pk>/", DepositAgentsDataDetailView.as_view(), name="deposit_agents_data_detail"),
     path("deposit_agent/send_link/<int:pk>/", SendLink.as_view(), name="deposit_agent_send_link"),
     path("deposit_agent/send_link/", SendLinkToMobileView.as_view(), name="deposit_agent_send_link_to_mobile"),
+    # path("deposit_agent/leng_constent/", SendLinkToMobileView.as_view(), name="deposit_agent_leng_constent"),
 
     # dsa
     path("dsa_upload/", DsaUploadView.as_view(), name="dsa_upload"),

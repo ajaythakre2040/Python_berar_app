@@ -18,8 +18,9 @@ import openpyxl
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Q
-from auth_system.utils.common import encrypt_id
+from auth_system.utils.common import encrypt_id, decrypt_id
 from auth_system.utils.otp_utils import send_link_to_mobile
+from constants import LanguageType
 
 class DepositAgentsUploadView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -233,7 +234,7 @@ class SendLink(APIView):
 
         encrypted_id = encrypt_id(pk)
         # Generate the link with the pk
-        url = f"https://uatcws.berarfinance.com/deposit_agents/f1/?{encrypted_id}"
+        url = f"https://uatcws.berarfinance.com/deposit_agents/f1/?id={encrypted_id}"
 
         return Response(
             {
@@ -274,3 +275,43 @@ class SendLinkToMobileView(APIView):
             },
             status=status.HTTP_200_OK if not api_response.get("error") else status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+class DepositAgentLinkView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        encrypted_id = request.query_params.get("id", None)
+
+        if not encrypted_id:
+            return Response(
+                {"success": False, "message": "Encrypted id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            decrypted_id = decrypt_id(encrypted_id)
+
+            agent = DepositAgentsData.objects.get(pk=decrypted_id, deleted_at__isnull=True)
+            agent_data = DepositAgentsDataSerializer(agent).data
+
+            languages = [
+                {"id": choice.value, "name": choice.label}
+                for choice in LanguageType
+            ]
+
+            return Response(
+                {
+                    "success": True,
+                    "message": "Deposit agent details fetched successfully",
+                    "agent_details": agent_data,
+                    "languages": languages,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"success": False, "message": f"Error processing link: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

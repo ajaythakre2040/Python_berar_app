@@ -3,5 +3,13 @@ from  code_of_conduct.models.assign_quarter import AssignQuarter
 
 class AssignQuarterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AssignQuarter
-        fields = '__all__'
+         model = AssignQuarter
+         fields = '__all__'
+         read_only_fields = [
+            "created_by",
+            "created_at",
+            "updated_by",
+            "updated_at",
+            "deleted_by",
+            "deleted_at",
+        ]

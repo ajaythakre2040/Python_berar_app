@@ -1,3 +1,4 @@
+import re
 from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -23,18 +24,32 @@ class CustomerByAddressZipcodeView(APIView):
                     "success": False,
                     "status_code": 400,
                     "message": "Both 'address' and 'zipcode' are required.",
-                    "data": [],
+                    
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not (isinstance(zipcode, str) and len(zipcode) == 6 and zipcode.isdigit()):
+            return Response(
+                {
+                    "success": False,
+                    "status_code": 400,
+                    "message": "Invalid zipcode. It must be a 6-digit number.",
+                    
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # cleaned_address = re.sub(r"[^a-zA-Z0-9\s]", "", address)
+        # cleaned_address = re.sub(r"\s+", " ", cleaned_address)
 
+        # params = {
+        #     "address": cleaned_address.strip(),
+        #     "zipcode": zipcode,
+        # }
         params = {"address": address, "zipcode": zipcode}
         response = call_mis_api(
             request, CUSTOMER_SEARCH_BY_ADDRESS_URL, params=params, timeout=30
         )
         return response
-       
-        
 
 
 class LoanAccountRemarkView(APIView):

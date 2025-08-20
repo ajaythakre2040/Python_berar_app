@@ -1,5 +1,3 @@
-# utils/mis_helpers.py
-
 import requests
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,7 +5,7 @@ from auth_system.utils.session_key_utils import get_mis_auth_headers
 
 
 def call_mis_api(request, url, params=None, timeout=30):
-   
+
     headers, error_response = get_mis_auth_headers(request)
     if error_response:
         return error_response
@@ -33,7 +31,8 @@ def call_mis_api(request, url, params=None, timeout=30):
 
         return Response(
             {
-                "success": True,
+                # "success": True,
+                # "status_code": status.HTTP_200_OK,
                 "message": "Data retrieved successfully.",
                 "data": response.json(),
             },
@@ -44,8 +43,11 @@ def call_mis_api(request, url, params=None, timeout=30):
         return Response(
             {
                 "success": False,
-                "message": "Unable to reach MIS service.",
-                "details": str(e),
+                "status_code": status.HTTP_502_BAD_GATEWAY,
+                "message": "MIS service is currently unavailable. Please try again later.",
+                "error_code": "MIS_UNREACHABLE",
+                "source": "MIS",
+                # "details": str(e)
             },
             status=status.HTTP_502_BAD_GATEWAY,
         )

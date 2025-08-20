@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from django.utils import timezone
 from django.db.models import Q
+from auth_system.permissions.authentication import SkipPortalCheckJWTAuthentication
 from ems.models.emp_basic_profile import TblEmpBasicProfile
 from ems.serializers.emp_basic_profile_serializers import (
     EmpBasicProfileSerializer,
@@ -15,20 +16,20 @@ from auth_system.utils.pagination import CustomPagination
 
 
 class EmpBasicProfileListCreateView(APIView):
-    permission_classes = [IsAuthenticated, IsTokenValid]
+    authentication_classes = [SkipPortalCheckJWTAuthentication]
 
     def get(self, request):
-        search_query = request.GET.get('search', '').strip()
+        search_query = request.GET.get("search", "").strip()
 
         queryset = TblEmpBasicProfile.objects.filter(deleted_at__isnull=True)
 
         if search_query:
             queryset = queryset.filter(
-                Q(name__icontains=search_query) |
-                Q(employee_code__icontains=search_query) |
-                Q(email__icontains=search_query) |
-                Q(mobile_number__icontains=search_query) |
-                Q(gender__icontains=search_query)
+                Q(name__icontains=search_query)
+                | Q(employee_code__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(mobile_number__icontains=search_query)
+                | Q(gender__icontains=search_query)
             )
 
         queryset = queryset.order_by("id")
@@ -54,6 +55,7 @@ class EmpBasicProfileListCreateView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
     def post(self, request):
         serializer = EmpBasicProfileSerializer(data=request.data)
         if serializer.is_valid():

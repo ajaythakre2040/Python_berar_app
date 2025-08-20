@@ -8,7 +8,7 @@ def generate_token(user, portal_id) -> dict:
     refresh["mobile_number"] = getattr(user, "mobile_number", None)
     refresh["email"] = getattr(user, "email", "")
     refresh["full_name"] = getattr(user, "full_name", "")
-    refresh["role_id"] = getattr(user, "role_id", 0)
+    refresh["role_id"] = getattr(user.role_id, "id", 0)
     refresh["portal_id"] = portal_id
 
     access = refresh.access_token
@@ -16,7 +16,7 @@ def generate_token(user, portal_id) -> dict:
     access["mobile_number"] = getattr(user, "mobile_number", None)
     access["email"] = getattr(user, "email", "")
     access["full_name"] = getattr(user, "full_name", "")
-    access["role_id"] = getattr(user, "role_id", 0)
+    access["role_id"] = user.role_id.id if user.role_id else 0
     access["portal_id"] = portal_id
 
     return {

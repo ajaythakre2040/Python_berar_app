@@ -18,12 +18,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/test/", TestAPIView.as_view()),
     path("api/auth_system/", include("auth_system.urls")),
-    path("api/cms/", include("cms.urls")),
     path("api/ems/", include("ems.urls")),
     path("api/lead/", include("lead.urls")),
+    path("api/cms/", include("cms.urls")),
     path("api/dedup/", include("dedup.urls")),
     path("api/code_of_conduct/", include("code_of_conduct.urls")),
-    
-    ]
+]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

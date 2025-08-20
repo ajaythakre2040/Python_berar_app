@@ -8,6 +8,10 @@ import re
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import CommonPasswordValidator
 
+from cryptography.fernet import Fernet
+from django.conf import settings
+import base64
+
 from lead.models.lead_logs import LeadLog
 
 User = get_user_model()
@@ -85,3 +89,20 @@ def create_lead_log(enquiry, status, user_id, remark=None, followup_pickup_date=
         followup_pickup_date=followup_pickup_date,
         created_by=user_id,
     )
+
+
+FERNET_KEY = getattr(settings, "FERNET_KEY", None)
+if not FERNET_KEY:
+    raise ValueError("FERNET_KEY not set in Django settings")
+
+fernet = Fernet(FERNET_KEY)
+
+def encrypt_id(id_value: int) -> str:
+    """Encrypt integer ID and return URL-safe string."""
+    token = fernet.encrypt(str(id_value).encode())
+    return base64.urlsafe_b64encode(token).decode()
+
+def decrypt_id(token_str: str) -> int:
+    """Decrypt URL-safe string back to integer ID."""
+    token = base64.urlsafe_b64decode(token_str.encode())
+    return int(fernet.decrypt(token).decode())

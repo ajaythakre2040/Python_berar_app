@@ -1,15 +1,14 @@
 from django.db import models
-from code_of_conduct.models.languages import Languages  # Language model
 from django.utils import timezone
+from code_of_conduct.models.languages import Languages
+from constants import QuestionTypeConstants  # import constants
 
 class Questions(models.Model):
-    TYPE_CHOICES = [
-        ('general', 'General'),
-        ('technical', 'Technical'),
-        ('other', 'Other'),
-    ]
 
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(
+        choices=QuestionTypeConstants.CHOICES, null=True, blank=True
+    )
+
     language = models.ForeignKey(Languages, on_delete=models.CASCADE)
     is_status = models.BooleanField(default=False)
     questions = models.TextField()
@@ -21,5 +20,8 @@ class Questions(models.Model):
     deleted_by = models.IntegerField(null=True, blank=True, default=None)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        db_table = "code_of_conduct_questions"  # This will be the table name in the DB
+
     def __str__(self):
-        return f"{self.type} - {self.questions[:30]}"
+        return f"{self.get_type_constant_display()} - {self.questions[:30]}"

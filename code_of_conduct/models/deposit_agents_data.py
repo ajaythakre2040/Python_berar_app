@@ -26,6 +26,9 @@ class DepositAgentsData(models.Model):
     deleted_by = models.IntegerField(null=True, blank=True, default=0)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        db_table = "code_of_conduct_deposit_agents_data"
+
     def __str__(self):
         return f"{self.name} | Owner: {self.owner_name} | City: {self.city} | Quarter: {self.quarter_code}"
 

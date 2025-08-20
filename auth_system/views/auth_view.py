@@ -219,6 +219,7 @@ class TwoFactorVerifyView(APIView):
         user_id = request.data.get("user_id")
         otp_code = request.data.get("otp_code")
         login_portal = request.data.get("portal_id", 1)
+        
         ip_address, agent_browser = get_client_ip_and_agent(request)
         request_id = request.data.get("request_id")
 

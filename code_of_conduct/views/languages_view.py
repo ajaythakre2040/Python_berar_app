@@ -11,7 +11,7 @@ from rest_framework.exceptions import NotFound
 from auth_system.utils.pagination import CustomPagination
 
 
-# ✅ LanguagesListCreateView
+# LanguagesListCreateView
 class LanguagesListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -59,7 +59,7 @@ class LanguagesListCreateView(APIView):
                 {
                     "success": True,
                     "message": "Language Type Created Successfully.",
-                    "data": response_serializer.data
+                    # "data": response_serializer.data
                 },
                 status=status.HTTP_201_CREATED,
             )
@@ -114,7 +114,7 @@ class LanguagesDetailView(APIView):
                 {
                     "success": True,
                     "message": "Language type updated successfully.",
-                    "data": serializer.data,
+                    # "data": serializer.data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -139,7 +139,7 @@ class LanguagesDetailView(APIView):
             {
                 "success": True,
                 "message": "Languages type deleted successfully.",
-                "data": serializer.data
+                # "data": serializer.data
             },
             status=status.HTTP_200_OK,
         )

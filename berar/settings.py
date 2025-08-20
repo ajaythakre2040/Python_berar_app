@@ -16,6 +16,8 @@ import os
 from corsheaders.defaults import default_headers
 from decouple import config
 
+FERNET_KEY =b'VaEN1_M4XqzKH3VUEHYR-RZ0xKxVYjUv2Yd7y3GGB0o='
+  # Example: Fernet.generate_key()
 
 # from decouple import config
 
@@ -28,6 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-a)v7=$#+$8(z+2z-x*5y=#7q#vb@6$2ya#7uc6f(m1)i#fl717"
+API_SMS_KEY = "a0ee6f-c9fb61-bff895-6094c1-b47ac5"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

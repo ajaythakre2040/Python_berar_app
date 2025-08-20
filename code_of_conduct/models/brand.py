@@ -10,6 +10,9 @@ class Brand(models.Model):
     deleted_by = models.IntegerField(null=True, blank=True, default=0)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        db_table = "code_of_conduct_brand"  # This will be the table name in the DB
+
     def __str__(self):
         return self.name
 

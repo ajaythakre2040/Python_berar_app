@@ -15,12 +15,16 @@ from auth_system.utils.pagination import CustomPagination
 from constants import EnquiryStatus
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from lead.models.enquiry_lead_assign_log import LeadAssignLog
+from ems.models.emp_basic_profile import TblEmpBasicProfile
+from django.db import transaction
 
 class EnquiryFollowUpCountAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
     def get(self, request):
         today = date.today()
+        count_only = request.query_params.get("count_only") == "true"
 
         loan_qs = EnquiryLoanDetails.objects.filter(
             followup_pickup_date__gte=today,
@@ -41,6 +45,15 @@ class EnquiryFollowUpCountAPIView(APIView):
                 }
             )
 
+        total_count = enquiries.count()
+
+        if count_only:
+            return Response({
+                "success": True,
+                "message": "Total follow-up enquiry count retrieved.",
+                "total_count": total_count
+            }, status=status.HTTP_200_OK)
+        
         paginator = CustomPagination()
         paginated_enquiries = paginator.paginate_queryset(enquiries, request)
 
@@ -105,12 +118,24 @@ class FollowUpUpdateAPIView(APIView):
 
 class ActiveEnquiriesAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
+  
 
     def get(self, request):
+        count_only = request.query_params.get("count_only") == "true"
+
         active_enquiries = Enquiry.objects.filter(
             is_status=EnquiryStatus.ACTIVE,
             deleted_at__isnull=True
         ).order_by("-id")
+
+        total_count = active_enquiries.count()
+
+        if count_only:
+            return Response({
+                "success": True,
+                "message": "Total active enquiry count retrieved.",
+                "total_count": total_count
+            }, status=status.HTTP_200_OK)
 
         paginator = CustomPagination()
         paginated_enquiries = paginator.paginate_queryset(active_enquiries, request)
@@ -128,10 +153,23 @@ class ClosedEnquiriesAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
     def get(self, request):
+
+        count_only = request.query_params.get("count_only") == "true"
+
         closed_enquiries = Enquiry.objects.filter(
             is_status=EnquiryStatus.CLOSED,
             deleted_at__isnull=True
         ).order_by("-id")
+
+        total_count = closed_enquiries.count()
+
+        if count_only:
+            return Response({
+                "success": True,
+                "message": "Total closed enquiry count retrieved.",
+                "total_count": total_count
+            }, status=status.HTTP_200_OK)
+        
 
         paginator = CustomPagination()
         paginated_enquiries = paginator.paginate_queryset(closed_enquiries, request)
@@ -144,6 +182,7 @@ class ClosedEnquiriesAPIView(APIView):
             "data": serializer.data
         })
     
+
 class ReopenEnquiryView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -189,3 +228,102 @@ class ReopenEnquiryView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
     
+
+class LeadAssignView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def post(self, request, enquiry_id):
+        data = request.data
+        employee_id = data.get("employee_id")
+        remark = data.get("remark")
+
+        if not employee_id:
+            return Response(
+                {"success": False, "message": "Select Employee."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not remark:
+            return Response(
+                {"success": False, "message": "Remark is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+        employee_profile = get_object_or_404(TblEmpBasicProfile, id=employee_id)
+
+        with transaction.atomic():
+            LeadAssignLog.objects.create(
+                enquiry=enquiry,
+                employee=employee_profile,  
+                remark=remark,
+                created_by=request.user.id 
+            )
+
+            LeadLog.objects.create(
+                enquiry=enquiry,
+                status="Lead assigned to employee.",
+                created_by=request.user.id,
+                remark=remark
+            )
+
+            enquiry.assign_to = employee_profile
+            enquiry.updated_at = timezone.now()
+            enquiry.updated_by = request.user.id
+            enquiry.save()
+
+            # Second LeadLog
+            LeadLog.objects.create(
+                enquiry=enquiry,
+                status="assign_to updated-",
+                created_by=request.user.id,
+                remark='Updated enquiry s assign_to field due to lead assignment'
+            )
+
+        return Response(
+            {"success": True, "message": "Assigned successfully."},
+            status=status.HTTP_200_OK
+        )
+
+
+class AllCountAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        today = date.today()
+
+        loan_qs = EnquiryLoanDetails.objects.filter(
+            followup_pickup_date__gte=today,
+            enquiry__deleted_at__isnull=True
+        ).select_related("enquiry")
+
+        enquiry_ids = loan_qs.values_list('enquiry_id', flat=True).distinct()
+        followup_enquiries = Enquiry.objects.filter(id__in=enquiry_ids)
+
+        for loan_detail in loan_qs:
+            LeadLog.objects.get_or_create(
+                enquiry_id=loan_detail.enquiry_id,
+                status="Follow-up Scheduled",
+                defaults={
+                    "created_by": 0,
+                    "remark": f"Follow-up scheduled for {loan_detail.followup_pickup_date}"
+                }
+            )
+
+        total_enquiries_count = Enquiry.objects.filter(deleted_at__isnull=True).count()
+        total_followup_count = followup_enquiries.count()
+        total_active_count = Enquiry.objects.filter(
+            is_status=EnquiryStatus.ACTIVE, deleted_at__isnull=True
+        ).count()
+        total_closed_count = Enquiry.objects.filter(
+            is_status=EnquiryStatus.CLOSED, deleted_at__isnull=True
+        ).count()
+
+        return Response({
+            "success": True,
+            "message": "Enquiry counts retrieved successfully.",
+            "total_enquiries_count": total_enquiries_count,
+            "total_followup_count": total_followup_count,
+            "total_active_count": total_active_count,
+            "total_closed_count": total_closed_count
+        }, status=status.HTTP_200_OK)

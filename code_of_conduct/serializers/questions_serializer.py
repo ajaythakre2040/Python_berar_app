@@ -1,20 +1,9 @@
 from rest_framework import serializers
-
-from ..models.questions import Questions
-
+from code_of_conduct.models.questions import Questions
 
 class QuestionsSerializer(serializers.ModelSerializer):
+    type_constant_display = serializers.CharField(source='get_type_constant_display', read_only=True)
+
     class Meta:
         model = Questions
-        # fields = "__all__"
-        exclude = ('created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted_at')
-
-        # read_only_fields = (
-        #     "created_by",
-        #     "updated_by",
-        #     "deleted_by",
-        #     "created_at",
-        #     "updated_at",
-        #     "deleted_at",
-        # )
-# 
+        fields = '__all__'

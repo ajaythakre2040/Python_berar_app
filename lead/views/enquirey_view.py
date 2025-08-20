@@ -34,7 +34,7 @@ class EnquiryListCreateAPIView(APIView):
             return Response({
                 "success": True,
                 "message": "Total enquiry count retrieved.",
-                "total_count": total_count
+                "total_counts": total_count
             }, status=status.HTTP_200_OK)
 
         enquiries = enquiries.order_by("id")

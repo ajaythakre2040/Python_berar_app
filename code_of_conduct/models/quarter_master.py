@@ -15,5 +15,8 @@ class QuarterMaster(models.Model):
     deleted_by = models.IntegerField(null=True, blank=True, default=0)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        db_table = "code_of_conduct_quarter_master"
+        
     def __str__(self):
         return f"{self.quarter} ({self.from_date} to {self.to_date})"

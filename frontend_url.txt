@@ -288,3 +288,10 @@ POST    {Base URL}lead/enquiries/{id}/skip_verification/
 POST    {Base URL}lead/enquiries/{id}/images/
 POST    {Base URL}lead/enquiries/{id}/selfie/
 ----------------------------------------------------
+
+lead URL
+
+GET    {Base URL}lead/enquiries/lead_assign/branch-employees/
+GET    {Base URL}lead/enquiries/lead_assign/branch-employees/?branch_id=1
+
+GET    {Base URL}lead/enquiries/assigned_lead/ 

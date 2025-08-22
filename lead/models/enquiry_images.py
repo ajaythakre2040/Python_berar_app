@@ -48,4 +48,4 @@ class EnquiryImages(models.Model):
     def __str__(self):
         return f"Image for Enquiry #{self.enquiry.id} by Employee {self.employee_id}"
     class Meta:
-        db_table = "lead_enquiry_image"  # ✅ Custom table name
+        db_table = "lead_enquiry_image" 

@@ -1,3 +1,0 @@
-from .loan_account_remark_serializer import LoanAccountRemarkSerializer
-from .apilog_serializer import APILogSerializer
-from .master_remark_serializer import MasterRemarkSerializer

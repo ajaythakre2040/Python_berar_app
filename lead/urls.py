@@ -9,13 +9,13 @@ from lead.views.loan_amount_range_views import LoanAmountRangeListCreateView, Lo
 from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView, EnquiryExistingDataAPIView
 from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
 from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
-from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView
+from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView, EnquiryImagesGetAPIView,EnquiryImagesDeleteAPIView,EnquiryImagesListAPIView
 from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView
 from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView,EnquiryVerificationCompleteAPIView
 
 from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
 
-from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView,AllCountAPIView
+from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView,AllCountAPIView, ThisMonthEnquiryListAPIView, TodayEnquiryListAPIView
 
 from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilterEmployeesAPIView, GetAssigned
 
@@ -45,6 +45,11 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/loan_details/", EnquiryLoanDetailsCreateAPIView.as_view(), name="enquiry-loan-details-create"),
 
     path("enquiries/<int:enquiry_id>/images/", EnquiryImagesCreateAPIView.as_view(), name="enquiry-images-create"),
+    path("enquiries/<int:enquiry_id>/images/<int:image_id>/", EnquiryImagesDeleteAPIView.as_view(), name="enquiry-images-delete"),
+
+    path("enquiries/<int:enquiry_id>/images/<int:image_id>", EnquiryImagesGetAPIView.as_view(), name="enquiry-images-get"),
+    path("enquiries/<int:enquiry_id>/images", EnquiryImagesListAPIView.as_view(), name="enquiry-images-get-all"),
+
     path("enquiries/<int:enquiry_id>/selfie/", EnquirySelfieCreateAPIView.as_view(), name="enquiry-selfie-create"),
 
     path("enquiries/<int:enquiry_id>/verification/", EnquiryVerificationCreateAPIView.as_view(), name="enquiry-verification-create"),
@@ -67,10 +72,14 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/reopen/", ReopenEnquiryView.as_view(), name="reopen-enquiry"),
     path("enquiries/all_counts/", AllCountAPIView.as_view(), name="lead-assign"),
 
+    path("enquiries/today/", TodayEnquiryListAPIView.as_view(), name="enquiries-today"),
+    path("enquiries/this-month/", ThisMonthEnquiryListAPIView.as_view(), name="enquiries-this-month"),
+
     path("enquiries/lead_assign/branch-employees/", GetBranchAndFilterEmployeesAPIView.as_view(), name="branch-employees"),
     path("enquiries/<int:enquiry_id>/lead_assign/", LeadAssignView.as_view(), name="lead-assign"),
 
     
     path("enquiries/assigned_lead/", GetAssigned.as_view(), name="lead-assign"),
 
+    
 ]

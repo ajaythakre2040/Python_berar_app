@@ -272,7 +272,6 @@ class LeadAssignView(APIView):
             enquiry.updated_by = request.user.id
             enquiry.save()
 
-            # Second LeadLog
             LeadLog.objects.create(
                 enquiry=enquiry,
                 status="assign_to updated-",
@@ -292,38 +291,66 @@ class AllCountAPIView(APIView):
     def get(self, request):
         today = date.today()
 
-        loan_qs = EnquiryLoanDetails.objects.filter(
-            followup_pickup_date__gte=today,
+        today_followups = EnquiryLoanDetails.objects.filter(
+            followup_pickup_date=today,
             enquiry__deleted_at__isnull=True
-        ).select_related("enquiry")
-
-        enquiry_ids = loan_qs.values_list('enquiry_id', flat=True).distinct()
-        followup_enquiries = Enquiry.objects.filter(id__in=enquiry_ids)
-
-        for loan_detail in loan_qs:
-            LeadLog.objects.get_or_create(
-                enquiry_id=loan_detail.enquiry_id,
-                status="Follow-up Scheduled",
-                defaults={
-                    "created_by": 0,
-                    "remark": f"Follow-up scheduled for {loan_detail.followup_pickup_date}"
-                }
-            )
-
-        total_enquiries_count = Enquiry.objects.filter(deleted_at__isnull=True).count()
-        total_followup_count = followup_enquiries.count()
-        total_active_count = Enquiry.objects.filter(
-            is_status=EnquiryStatus.ACTIVE, deleted_at__isnull=True
         ).count()
-        total_closed_count = Enquiry.objects.filter(
-            is_status=EnquiryStatus.CLOSED, deleted_at__isnull=True
+
+        today_created = Enquiry.objects.filter(
+            created_at__date=today,
+            deleted_at__isnull=True
+        ).count()
+
+        this_month_created = Enquiry.objects.filter(
+            created_at__year=today.year,
+            created_at__month=today.month,
+            deleted_at__isnull=True
         ).count()
 
         return Response({
             "success": True,
             "message": "Enquiry counts retrieved successfully.",
-            "total_enquiries_count": total_enquiries_count,
-            "total_followup_count": total_followup_count,
-            "total_active_count": total_active_count,
-            "total_closed_count": total_closed_count
+            "total_enquiries_count": Enquiry.objects.filter(deleted_at__isnull=True).count(),
+            "total_followup_count": EnquiryLoanDetails.objects.filter(
+                followup_pickup_date__gte=today,
+                enquiry__deleted_at__isnull=True
+            ).values("enquiry_id").distinct().count(),
+            "total_active_count": Enquiry.objects.filter(
+                is_status=EnquiryStatus.ACTIVE, deleted_at__isnull=True
+            ).count(),
+            "total_closed_count": Enquiry.objects.filter(
+                is_status=EnquiryStatus.CLOSED, deleted_at__isnull=True
+            ).count(),
+            "today_followup_count": today_followups,   
+            "today_created_count": today_created,   
+            "current_month_count": this_month_created   
+
         }, status=status.HTTP_200_OK)
+    
+
+class ThisMonthEnquiryListAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request, *args, **kwargs):
+        today = date.today()
+        enquiries = Enquiry.objects.filter(
+            created_at__year=today.year,
+            created_at__month=today.month,
+            deleted_at__isnull=True
+        ).order_by("-created_at")
+        
+        serializer = EnquirySerializer(enquiries, many=True)
+        return Response(serializer.data)
+
+class TodayEnquiryListAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request, *args, **kwargs):
+        today = date.today()
+        enquiries = Enquiry.objects.filter(
+            created_at__date=today,
+            deleted_at__isnull=True
+        ).order_by("-created_at")
+
+        serializer = EnquirySerializer(enquiries, many=True)
+        return Response(serializer.data)

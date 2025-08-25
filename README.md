@@ -13,7 +13,6 @@ Apps and Descriptions:
 - cms: Customer Management System for managing customer data, interactions, and related content.
 - ems: Employee Management System, handling employee records.
 - lead: Lead and enquiry management, loan processing workflows.
-- dedup: Used for setting remarks for existing customers. 
 - code_of_conduct: Used for uploading multiple files and storing these records.
 
 ------------------------
@@ -88,8 +87,7 @@ Project Structure
 
 berar_app/
 ├── auth_system/         # Authentication app
-├── cms/                 # Customer Management System
-├── dedup/               # Used for setting remarks for existing customers.
+├── cms/                 # Customer Management System   
 ├── ems/                 # Employee management
 ├── lead/                # Lead and enquiry management
 ├── code_of_conduct/     # Used for uploading multiple files and storing these records.
@@ -132,7 +130,7 @@ Examples:
 - /api/cms/
 - /api/ems/
 - /api/lead/
-- /api/dedup/
+
 - /api/code_of_conduct/
 
 Check each app's urls.py for specific endpoints.

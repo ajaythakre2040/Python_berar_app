@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from ..models.enquiry_selfie import EnquirySelfie
 
+
 class EnquirySelfieSerializer(serializers.ModelSerializer):
+    selfie = serializers.ImageField(allow_empty_file=False, use_url=True)
+
     class Meta:
         model = EnquirySelfie
         exclude = (
@@ -13,17 +16,3 @@ class EnquirySelfieSerializer(serializers.ModelSerializer):
             "deleted_at",
         )
         read_only_fields = ("enquiry",)
-
-    def validate(self, data):
-        selfies = [
-            data.get("selfie1"),
-            data.get("selfie2"),
-            data.get("selfie3"),
-            data.get("selfie4"),
-            data.get("selfie5"),
-            data.get("selfie6"),
-        ]
-
-        if not any(selfies):
-            raise serializers.ValidationError("At least one selfie is required.")
-        return data

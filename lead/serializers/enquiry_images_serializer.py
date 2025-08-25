@@ -12,20 +12,13 @@ class EnquiryImageSerializer(serializers.ModelSerializer):
             "updated_at",
             "deleted_at",
         )
-        read_only_fields = (
-            "enquiry",
-        )
+        read_only_fields = ("enquiry",)
 
-    def vaidate(self, data):
-        images = [
-            data.get('image1'),
-            data.get('image2'),
-            data.get('image3'),
-            data.get('image4'),
-            data.get('image5'),
-            data.get('image6'),
-        ]
+    def validate(self, data):
+        media_file = data.get("media_file")
 
-        if not any(images):
-            raise serializers.ValidationError("At Lest one image is required")
+        if not media_file:
+            raise serializers.ValidationError(
+                {"media_file": "At least one image is required."}
+            )
         return data

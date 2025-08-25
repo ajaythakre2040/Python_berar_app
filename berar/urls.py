@@ -21,7 +21,7 @@ urlpatterns = [
     path("api/ems/", include("ems.urls")),
     path("api/lead/", include("lead.urls")),
     path("api/cms/", include("cms.urls")),
-    path("api/dedup/", include("dedup.urls")),
+   
     path("api/code_of_conduct/", include("code_of_conduct.urls")),
 ]
 if settings.DEBUG:

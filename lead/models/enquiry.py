@@ -18,7 +18,6 @@ class Enquiry(models.Model):
     loan_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True, blank=True)
     occupation = models.IntegerField(choices=OCCUPATION_CHOICES, null=False,default=1)
 
-    # occupation = models.CharField(max_length=100, choices=OCCUPATION_CHOICES, null=False)
     employer_name = models.CharField(max_length=255, null=True, blank=True)
     number_of_years_service = models.IntegerField(null=True, blank=True)
     official_contact_number = models.CharField(max_length=15, null=True, blank=True)

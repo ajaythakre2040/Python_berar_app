@@ -226,48 +226,6 @@ PATCH   {Base URL}ems/subdealers/<id>/
 DELETE  {Base URL}ems/subdealers/<id>/
 
 
-==============================
-Dedup API Endpoints
-==============================
-
-Search Customers by Address and Zipcode 
--------------------------------------------------------
-
-post     {Base URL}dedup/customers/search-by-address/
-
-Loan Account Remark  
--------------------
-POST    {Base URL}dedup/loan-account-remarks/
-
-
-Get All Remarks (with Optional Search)
--------------------
-GET     {Base URL}dedup/loan-account-remarks/
-GET     {Base URL}dedup/loan-account-remarks/?search=<loan_account | loan_id | remark>
-
-
-Dedup Logs  
-----------
-GET     {Base URL}dedup/logs/
-GET     {Base URL}dedup/logs/?search=<method | endpoint | uniqid>
-GET     {Base URL}dedup/logs/count/
-GET     {Base URL}dedup/logs/?from_date=2025-07-01&to_date=2025-07-15
-
-
-Download All Logs (Without Pagination)
---------------------------------------
-GET     {Base URL}dedup/logs/download-all/
-GET     {Base URL}dedup/logs/download-all/?from_date=<YYYY-MM-DD>&to_date=<YYYY-MM-DD>
-
-
-Master Remarks
-GET {Base URL}dedup/master-remarks/ — Get all master remarks
-POST {Base URL}dedup/master-remarks/ — Create a new master remark
-GET {Base URL}dedup/master-remarks/<int:pk>/ — Get details of a specific master remark
-patch {Base URL}dedup/master-remarks/<int:pk>/ — Update a master remark
-DELETE {Base URL}dedup/master-remarks/<int:pk>/ — Delete a master remark
-
-
 
 ENQUIRY URL
 -------------------------------------

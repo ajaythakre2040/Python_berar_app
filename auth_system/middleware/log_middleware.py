@@ -140,8 +140,6 @@ class APILogMiddleware(MiddlewareMixin):
                     app_name = "cms"
                 elif path.startswith("/api/lead/"):
                     app_name = "lead"
-                elif path.startswith("/api/dedup/"):
-                    app_name = "dedup"
                 elif path.startswith("/api/code_of_conduct/"):
                     app_name = "code_of_conduct"
                 elif path.startswith("/api/auth_system/"):

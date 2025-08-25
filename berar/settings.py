@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "auth_system",
     "ems",
     "lead",
-    "dedup",
     "cms",
     "code_of_conduct",
 ]
@@ -104,7 +103,7 @@ WSGI_APPLICATION = "berar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db_berar_app",
+        "NAME": "db_berar_app1",
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",

@@ -23,7 +23,6 @@ class EnquiryLoanDetailsCreateAPIView(APIView):
             try:
                 saved_instance = serializer.save(enquiry=enquiry, created_by=request.user.id)
 
-                # update step status if needed
                 if enquiry.is_steps < PercentageStatus.ENQUIRY_LOAN_DETAILS:
                     enquiry.is_steps = PercentageStatus.ENQUIRY_LOAN_DETAILS
                     enquiry.updated_by = request.user.id

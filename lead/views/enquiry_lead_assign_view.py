@@ -79,7 +79,6 @@ class LeadAssignView(APIView):
 
         user = get_object_or_404(TblUser, id=employee_id)
 
-        # Get TblEmpBasicProfile (HR/employee profile) using employee_code or employee_id
         employee_profile = get_object_or_404(
             TblEmpBasicProfile, employee_code=user.employee_code
         )
@@ -87,7 +86,6 @@ class LeadAssignView(APIView):
         branch = get_object_or_404(TblBranch, id=branch_id)
 
         with transaction.atomic():
-            # LeadAssignLog expects TblEmpBasicProfile
             LeadAssignLog.objects.create(
                 enquiry=enquiry,
                 employee=employee_profile,  
@@ -103,7 +101,6 @@ class LeadAssignView(APIView):
                 remark=remark
             )
 
-            # Update enquiry (if assign_to is FK to TblEmpBasicProfile)
             enquiry.assign_to = employee_profile 
             enquiry.branch = branch
             enquiry.updated_at = timezone.now()

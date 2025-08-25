@@ -12,9 +12,7 @@ def image_upload_path(instance, filename):
 class EnquiryImages(models.Model):
     enquiry = models.ForeignKey(Enquiry, on_delete=models.CASCADE, related_name="enquiry_images")
 
-    premises_type = models.CharField(max_length=100)
     employee_id = models.IntegerField()
-
     capture_date = models.DateField(editable=False)
     capture_time = models.TimeField(editable=False)
 
@@ -22,12 +20,11 @@ class EnquiryImages(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
-    image1 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)  
-    image2 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)
-    image3 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)
-    image4 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)
-    image5 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)
-    image6 = models.ImageField(upload_to=image_upload_path, null=True, blank=True)
+    document_types = models.IntegerField()
+    document_sub_types = models.IntegerField()
+    premises_type = models.IntegerField()
+
+    media_file = models.FileField(upload_to=image_upload_path)
 
     created_by = models.IntegerField()
     created_at = models.DateTimeField(default=timezone.now)

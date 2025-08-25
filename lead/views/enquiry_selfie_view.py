@@ -7,11 +7,9 @@ from django.shortcuts import get_object_or_404
 from lead.models import Enquiry
 from lead.serializers.enquiry_selfie_serializer import EnquirySelfieSerializer
 from auth_system.permissions.token_valid import IsTokenValid
-from constants import PercentageStatus
+from constants import PercentageStatus, EnquiryStatus
 from django.utils import timezone
-from constants import EnquiryStatus
 from lead.models.lead_logs import LeadLog  
-
 
 class EnquirySelfieCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -19,52 +17,53 @@ class EnquirySelfieCreateAPIView(APIView):
     def post(self, request, enquiry_id):
         enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
 
-        serializer = EnquirySelfieSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
+        selfie_files = request.FILES.getlist("selfie")
+        if not selfie_files:
+            return Response({
+                "success": False,
+                "message": "At least one selfie is required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        for selfie_file in selfie_files:
+            data = request.data.copy()
+            data["selfie"] = selfie_file
+
+            serializer = EnquirySelfieSerializer(data=data)
+            if serializer.is_valid():
                 serializer.save(enquiry=enquiry, created_by=request.user.id)
-
-                # Update step if it's not already at or beyond ENQUIRY_SELFIE
-                if enquiry.is_steps < PercentageStatus.ENQUIRY_SELFIE:
-                    enquiry.is_steps = PercentageStatus.ENQUIRY_SELFIE
-
-                # Update audit fields
-                enquiry.updated_by = request.user.id
-                enquiry.updated_at = timezone.now()
-
-                # Check if all major steps are completed to mark enquiry as submitted
-                all_data_present = (
-                    enquiry.enquiry_addresses.exists() and
-                    enquiry.enquiry_loan_details.exists() and
-                    enquiry.enquiry_images.exists() and
-                    enquiry.enquiry_selfies.exists()
-                )
-
-                if all_data_present:
-                    enquiry.is_status = EnquiryStatus.SUBMITTED
-
-                # Always save if any update happened
-                enquiry.save()
-                LeadLog.objects.create(
-                    enquiry=enquiry,
-                    status="Enquiry Selfie Form",
-                    created_by=request.user.id,
-                )
-                return Response({
-                    "success": True,
-                    "message": "Enquiry selfie saved and enquiry updated.",
-                    "data": serializer.data
-                }, status=status.HTTP_201_CREATED)
-
-            except IntegrityError as e:
+            else:
                 return Response({
                     "success": False,
-                    "message": "Database integrity error while saving selfie.",
-                    "error": str(e)
+                    "message": "Invalid selfie data.",
+                    "errors": serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
 
+        if enquiry.is_steps < PercentageStatus.ENQUIRY_SELFIE:
+            enquiry.is_steps = PercentageStatus.ENQUIRY_SELFIE
+
+        enquiry.updated_by = request.user.id
+        enquiry.updated_at = timezone.now()
+
+        all_data_present = (
+            enquiry.enquiry_addresses.exists()
+            and enquiry.enquiry_loan_details.exists()
+            and enquiry.enquiry_images.exists()
+            and enquiry.enquiry_selfies.exists()
+        )
+        if all_data_present:
+            enquiry.is_status = EnquiryStatus.SUBMITTED
+        enquiry.save()
+
+        LeadLog.objects.create(
+            enquiry=enquiry,
+            status="Enquiry Selfie Form",
+            created_by=request.user.id,
+        )
+
+        all_selfies = EnquirySelfieSerializer(enquiry.enquiry_selfies.all(), many=True).data
+
         return Response({
-            "success": False,
-            "message": "Invalid data submitted for enquiry selfie.",
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+            "success": True,
+            "message": "Selfie(s) saved successfully.",
+            "data": all_selfies
+        }, status=status.HTTP_201_CREATED)

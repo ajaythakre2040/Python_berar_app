@@ -10,7 +10,7 @@ from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView
 from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
 from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
 from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView, EnquiryImagesGetAPIView,EnquiryImagesDeleteAPIView,EnquiryImagesListAPIView
-from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView
+from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView, EnquirySelfieReplaceAPIView
 from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView,EnquiryVerificationCompleteAPIView
 
 from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
@@ -51,6 +51,7 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/images", EnquiryImagesListAPIView.as_view(), name="enquiry-images-get-all"),
 
     path("enquiries/<int:enquiry_id>/selfie/", EnquirySelfieCreateAPIView.as_view(), name="enquiry-selfie-create"),
+    path("enquiries/<int:enquiry_id>/selfie/<int:selfie_id>/", EnquirySelfieReplaceAPIView.as_view(), name="enquiry-selfie-replace"),
 
     path("enquiries/<int:enquiry_id>/verification/", EnquiryVerificationCreateAPIView.as_view(), name="enquiry-verification-create"),
     path("enquiries/<int:enquiry_id>/otp_verification/", otpVerificationAPIView.as_view(), name="opt-verification"),

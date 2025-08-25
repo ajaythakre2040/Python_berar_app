@@ -251,5 +251,4 @@ lead URL
 
 GET    {Base URL}lead/enquiries/lead_assign/branch-employees/
 GET    {Base URL}lead/enquiries/lead_assign/branch-employees/?branch_id=1
-
 GET    {Base URL}lead/enquiries/assigned_lead/ 

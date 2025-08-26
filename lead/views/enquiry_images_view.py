@@ -67,10 +67,13 @@ class EnquiryImagesCreateAPIView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class EnquiryImagesDeleteAPIView(APIView):
+
     permission_classes = [IsAuthenticated, IsTokenValid]
 
     def delete(self, request, enquiry_id, image_id):
+        
         image_instance = get_object_or_404(
             EnquiryImages,
             pk=image_id,

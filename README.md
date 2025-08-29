@@ -28,7 +28,7 @@ Windows:
 Mac/Linux:
   python3 -m venv venv
   source venv/bin/activate
-
+  venv\Scripts\activate
 2. Install Dependencies
 
 Make sure you have requirements.txt, then run:
@@ -165,5 +165,6 @@ Email: your_email@example.com
 GitHub: https://github.com/yourusername/berar_app
 
 ------------------------
+python manage.py migrate auth_system --fake
 
 Happy coding! 🚀

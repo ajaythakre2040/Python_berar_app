@@ -11,21 +11,22 @@ from auth_system.utils.pagination import CustomPagination
 from django.db import IntegrityError
 from django.db.models import Q
 
+
 class TblBranchListCreateView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
     def get(self, request):
-        search_query = request.GET.get('search', '')  # URL se ?search=xyz le rahe hain
+        search_query = request.GET.get("search", "")
 
         branches = TblBranch.objects.filter(deleted_at__isnull=True)
 
         if search_query:
             branches = branches.filter(
-                Q(branch_name__icontains=search_query) |
-                Q(branch_code__icontains=search_query) |
-                Q(branch_id__icontains=search_query) |
-                Q(email__icontains=search_query) |
-                Q(mobile_number__icontains=search_query)
+                Q(branch_name__icontains=search_query)
+                | Q(branch_code__icontains=search_query)
+                | Q(branch_id__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(mobile_number__icontains=search_query)
             )
 
         branches = branches.order_by("id")
@@ -64,13 +65,13 @@ class TblBranchListCreateView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         return Response(
-        {
-            "success": False,
-            "message": "Failed to create branch.",
-            "errors": serializer.errors,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
+            {
+                "success": False,
+                "message": "Failed to create branch.",
+                "errors": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class TblBranchDetailView(APIView):
@@ -94,11 +95,9 @@ class TblBranchDetailView(APIView):
             status=status.HTTP_200_OK,
         )
 
-    def patch(self, request, pk):  
+    def patch(self, request, pk):
         branch = self.get_object(pk)
-        serializer = TblBranchSerializer(
-            branch, data=request.data, partial=True
-        )  
+        serializer = TblBranchSerializer(branch, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(updated_by=request.user.id, updated_at=timezone.now())
             return Response(

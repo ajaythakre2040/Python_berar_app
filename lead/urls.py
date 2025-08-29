@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from lead.views.nature_of_business_views import NatureOfBusinessListCreateView, NatureOfBusinessDetailView
 from lead.views.product_type_views import ProductTypeListCreateView, ProductTypeDetailView
@@ -56,6 +58,7 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/images/<int:image_id>/", EnquiryImagesDeleteAPIView.as_view(), name="enquiry-images-delete"),
 
     path("enquiries/<int:enquiry_id>/images/<int:image_id>", EnquiryImagesGetAPIView.as_view(), name="enquiry-images-get"),
+    # path("enquiries/<int:enquiry_id>/images/<int:image_id>/file/", EnquiryImagesGetAPIView.as_view(), name="enquiry-image-file"),
     path("enquiries/<int:enquiry_id>/images", EnquiryImagesListAPIView.as_view(), name="enquiry-images-get-all"),
 
     #Lead Selfie
@@ -99,5 +102,5 @@ urlpatterns = [
     
     path("enquiries/assigned_lead/", GetAssigned.as_view(), name="lead-assign"),
 
-    
-]
+  
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -3,7 +3,7 @@ from auth_system.models.email_logs import EmailLogs
 from auth_system.models.otp import OTP
 from auth_system.models.sms_log import SmsLog
 from auth_system.utils.common import generate_otp, otp_expiry_time, generate_request_id
-from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link
+from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link,send_enquiry_otp_to_mobile
 from constants import EmailType, OtpType, SmsType, DeliveryStatus
 
 
@@ -42,12 +42,12 @@ def enquiry_mobile_otp(mobile, user_id=None):
     otp_code = generate_otp()
     expiry = otp_expiry_time()
     request_id = generate_request_id()
-    # sms_status = (
-    #     DeliveryStatus.DELIVERED
-    #     if send_enquiry_otp_to_mobile(mobile, otp_code)
-    #     else DeliveryStatus.FAILED
-    # )
-    sms_status = DeliveryStatus.DELIVERED
+    sms_status = (
+        DeliveryStatus.DELIVERED
+        if send_enquiry_otp_to_mobile(mobile, otp_code)
+        else DeliveryStatus.FAILED
+    )
+    # sms_status = DeliveryStatus.DELIVERED
     OTP.objects.create(
         user_id=user_id,
         otp_type=OtpType.LEAD_VERIFICATION,

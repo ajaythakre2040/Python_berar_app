@@ -2,6 +2,8 @@ from rest_framework import serializers
 from ..models.enquiry_images import EnquiryImages
 
 class EnquiryImageSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = EnquiryImages
         exclude = (
@@ -14,11 +16,7 @@ class EnquiryImageSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("enquiry",)
 
-    def validate(self, data):
-        media_file = data.get("media_file")
-
-        if not media_file:
-            raise serializers.ValidationError(
-                {"media_file": "At least one image is required."}
-            )
-        return data
+    def get_file_url(self, obj):
+        if obj.media_file:
+            return obj.media_file.url   # this gives /media/... directly
+        return None

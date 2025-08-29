@@ -339,8 +339,16 @@ class ThisMonthEnquiryListAPIView(APIView):
             deleted_at__isnull=True
         ).order_by("-created_at")
         
-        serializer = EnquirySerializer(enquiries, many=True)
-        return Response(serializer.data)
+        paginator = CustomPagination()
+        paginated_enquiries = paginator.paginate_queryset(enquiries, request)
+
+        serializer = EnquirySerializer(paginated_enquiries, many=True)
+
+        return paginator.get_paginated_response({
+            "success": True,
+            "message": "Months enquiries retrieved successfully.",
+            "data": serializer.data
+        })
 
 class TodayEnquiryListAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -352,5 +360,13 @@ class TodayEnquiryListAPIView(APIView):
             deleted_at__isnull=True
         ).order_by("-created_at")
 
-        serializer = EnquirySerializer(enquiries, many=True)
-        return Response(serializer.data)
+        paginator = CustomPagination()
+        paginated_enquiries = paginator.paginate_queryset(enquiries, request)
+
+        serializer = EnquirySerializer(paginated_enquiries, many=True)
+
+        return paginator.get_paginated_response({
+            "success": True,
+            "message": "Todays enquiries retrieved successfully.",
+            "data": serializer.data
+        })

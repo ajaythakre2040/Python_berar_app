@@ -21,6 +21,7 @@ from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpd
 
 from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilterEmployeesAPIView, GetAssigned
 
+from lead.views.enquiry_ticket_view import EnquiryTicketCreateAPIView, EnquiryTicketDetailAPIView
 
 
 urlpatterns = [
@@ -102,5 +103,9 @@ urlpatterns = [
     
     path("enquiries/assigned_lead/", GetAssigned.as_view(), name="lead-assign"),
 
-  
+    #LEAD ENQUIRY TICKETS
+    path("enquiries/ticket/", EnquiryTicketCreateAPIView.as_view(), name="enquiries-ticket-create"),
+    path("enquiries/ticket/<int:ticket_id>/", EnquiryTicketDetailAPIView.as_view(), name="enquiries-ticket-get-by-id")
+    
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -3,3 +3,5 @@ from .nature_of_business_serializer import NatureOfBusinessSerializer
 from .property_type_serializer import PropertyTypeSerializer
 from .property_document_serializer import PropertyDocumentSerializer  
 from .loan_amount_range_serializer import LoanAmountRangeSerializer  
+from .enquiry_tickets_serializers import EnquiryTicketSerializer
+

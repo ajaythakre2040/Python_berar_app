@@ -274,3 +274,20 @@ class EnquiryLeadStatus(models.TextChoices):
     ASSIGNED = "ASSIGNED", "Assigned"
     UPDATED = "UPDATED", "Updated"
     CLOSED = "CLOSED", "Closed"
+
+    # percentage status
+
+
+
+#ticket constents
+
+class TicketPriority(models.IntegerChoices):
+    LOW = 1, "Low"
+    MEDIUM = 2, "Medium"
+    HIGH = 3, "High"
+
+
+class TicketStatus(models.IntegerChoices):
+    TICKET_OPEN = 1, "OPEN"
+    TICKET_CLOSED = 2, "CLOSED"
+    TICKET_ACTIVE = 3, "ACTIVE"

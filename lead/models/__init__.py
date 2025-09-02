@@ -13,3 +13,4 @@ from .configuration import Configuration
 from .lead_logs import LeadLog
 from .enquiry_lead_assign_log import LeadAssignLog
 from .apilog import APILog
+from .enquiry_tickets import EnquiryTickets

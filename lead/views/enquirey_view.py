@@ -12,7 +12,8 @@ from rest_framework.exceptions import NotFound
 from constants import PercentageStatus
 from constants import EnquiryStatus
 from lead.models.lead_logs import LeadLog  
-
+from api_endpoints import CUSTOMER_GET_BY_ACCOUNT_URL
+from lead.utils.mis_helpers import call_mis_api
 
 class EnquiryListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -134,31 +135,71 @@ class EnquiryDetailView(APIView):
     
 class EnquiryExistingDataAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
+
     def post(self, request):
-        mobile = request.data.get("mobile_number")
-        lan = request.data.get("lan_number")
+        mobile = request.data.get("mobile_number", "").strip()
+        lan = request.data.get("lan_number", "").strip()
 
         if not mobile and not lan:
-            return Response({
-                "success": False,
-                "message": "At least mobile_number or lan_number is required."
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "success": False,
+                    "message": "At least mobile_number or lan_number is required.",
+                    "data": None,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        query = Q(deleted_at__isnull=True)
-        if mobile:
-            query &= Q(mobile_number=mobile)
+        params = {}
         if lan:
-            query &= Q(lan_number=lan)
-        enquiry = Enquiry.objects.filter(query).order_by("-id").first()
-        if not enquiry:
-            return Response({
-                "success": False,
-                "message": "No matching enquiry found."
-            }, status=status.HTTP_404_NOT_FOUND)
+            params["loanAccount"] = lan
+        if mobile:
+            params["mobileNumber"] = mobile
 
-        serializer = EnquirySerializer(enquiry)
-        return Response({
-            "success": True,
-            "message": "Latest matching enquiry retrieved.",
-            "data": serializer.data
-        }, status=status.HTTP_200_OK)
+        # ✅ call_mis_api already handles errors, timeouts, and response formatting
+        return call_mis_api(
+            request, CUSTOMER_GET_BY_ACCOUNT_URL, params=params, timeout=30
+        )
+
+# class EnquiryExistingDataAPIView(APIView):
+#     permission_classes = [IsAuthenticated, IsTokenValid]
+#     def post(self, request):
+#         mobile = request.data.get("mobile_number")
+#         lan = request.data.get("lan_number")
+
+#         if not mobile and not lan:
+#             return Response({
+#                 "success": False,
+#                 "message": "At least mobile_number or lan_number is required."
+#             }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+#         params = {"loanAccount": lan, "mobileNumber":mobile}
+        
+#         return call_mis_api(
+#             request, CUSTOMER_GET_BY_ACCOUNT_URL, params=params, timeout=30
+
+#         )    
+    
+#         # query = Q(deleted_at__isnull=True)
+#         # if mobile:
+#         #     query &= Q(mobile_number=mobile)
+#         # if lan:
+#         #     query &= Q(lan_number=lan)
+
+
+#         # enquiry = Enquiry.objects.filter(query).order_by("-id").first()
+
+
+#         # if not enquiry:
+#         #     return Response({
+#         #         "success": False,
+#         #         "message": "No matching enquiry found."
+#         #     }, status=status.HTTP_404_NOT_FOUND)
+
+#         # serializer = EnquirySerializer(enquiry)
+#         # return Response({
+#         #     "success": True,
+#         #     "message": "Latest matching enquiry retrieved.",
+#         #     "data": serializer.data
+#         # }, status=status.HTTP_200_OK)

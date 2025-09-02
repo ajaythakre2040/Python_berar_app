@@ -1,10 +1,10 @@
 from django.db import models
 from lead.models.enquiry import Enquiry
-from constants import EnquiryStatus
+from constants import EnquiryLeadStatus
 
 class LeadLog(models.Model):
     enquiry = models.ForeignKey(Enquiry, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=50, choices=EnquiryStatus.choices, default=EnquiryStatus.DRAFT)
+    status = models.TextField(choices=EnquiryLeadStatus.choices, default=EnquiryLeadStatus.DRAFT)
     remark = models.TextField(null=True, blank=True)
     followup_pickup_date = models.DateField(null=True, blank=True)
 

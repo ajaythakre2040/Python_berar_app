@@ -113,19 +113,7 @@ class EnquiryImagesGetAPIView(APIView):
             "data": serializer.data
         }, status=status.HTTP_200_OK)
 
-# class EnquiryImagesGetAPIView(APIView):
-#     permission_classes = [IsAuthenticated]
 
-#     def get(self, request, enquiry_id, image_id):
-#         image = get_object_or_404(
-#             EnquiryImages,
-#             pk=image_id,
-#             enquiry_id=enquiry_id,
-#             deleted_at__isnull=True
-#         )
-#         if not image.media_file:
-#             raise Http404("No file found")
-#         return FileResponse(image.media_file.open(), content_type="image/jpeg")
     
 
 class EnquiryImagesListAPIView(APIView):

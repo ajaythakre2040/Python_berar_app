@@ -12,7 +12,7 @@ from lead.models.lead_logs import LeadLog  # import LeadLog model
 from lead.serializers.enquiry_serializer import EnquirySerializer
 from auth_system.permissions.token_valid import IsTokenValid
 from auth_system.utils.pagination import CustomPagination
-from constants import EnquiryStatus
+from constants import EnquiryStatus, EnquiryLeadStatus
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from lead.models.enquiry_lead_assign_log import LeadAssignLog
@@ -262,7 +262,7 @@ class LeadAssignView(APIView):
 
             LeadLog.objects.create(
                 enquiry=enquiry,
-                status="Lead assigned to employee.",
+                status=EnquiryLeadStatus.ASSIGNED,
                 created_by=request.user.id,
                 remark=remark
             )
@@ -274,7 +274,7 @@ class LeadAssignView(APIView):
 
             LeadLog.objects.create(
                 enquiry=enquiry,
-                status="assign_to updated-",
+                status=EnquiryLeadStatus.UPDATED,
                 created_by=request.user.id,
                 remark='Updated enquiry s assign_to field due to lead assignment'
             )

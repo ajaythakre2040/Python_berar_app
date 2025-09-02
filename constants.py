@@ -194,6 +194,7 @@ EMAIL_STATUS_CHOICES = (
 MOBILE_PENDING = 0
 MOBILE_VERIFIED = 1
 MOBILE_SKIPPED = 2
+
 MOBILE_STATUS_CHOICES = (
     (MOBILE_PENDING, "Pending"),
     (MOBILE_VERIFIED, "Verified"),
@@ -267,3 +268,9 @@ class LanguageType(models.IntegerChoices):
     KANNADA = 7, "Kannada"
     TAMIL = 8, "Tamil"
     
+
+class EnquiryLeadStatus(models.TextChoices):
+    DRAFT = "DRAFT", "Draft"
+    ASSIGNED = "ASSIGNED", "Assigned"
+    UPDATED = "UPDATED", "Updated"
+    CLOSED = "CLOSED", "Closed"

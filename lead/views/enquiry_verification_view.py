@@ -179,12 +179,12 @@ class EnquiryVerificationCompleteAPIView(APIView):
 
         user_id = request.user.id
 
-        verification = EnquiryVerification.objects.filter(enquiry=enquiry).first()
-        if not verification:
-            return Response(
-                {"message": "No verification record found. Please start verification first."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        
+        # ✅ Ensure record always exists
+        verification, created = EnquiryVerification.objects.get_or_create(
+            enquiry=enquiry,
+            defaults={"created_by": user_id, "created_at": timezone.now()},
+        )
 
         if mobile:
             verification.mobile = mobile
@@ -219,11 +219,11 @@ class EnquiryVerificationCompleteAPIView(APIView):
 
         LeadLog.objects.create(
             enquiry=enquiry,
-            status="Enquiry Final Verification Success",
+            status="Enquiry Final Verification Submitted",
             created_by=request.user.id,
         )
 
         return Response({
             "status": "success",
-            "message": "Verification details updated successfully.",
+            "message": "Verification details saved (including skipped).",
         }, status=status.HTTP_200_OK)

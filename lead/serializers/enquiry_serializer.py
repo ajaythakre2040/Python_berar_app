@@ -52,7 +52,9 @@ class EnquirySelfieSerializer(serializers.ModelSerializer):
 class EnquirySerializer(serializers.ModelSerializer):
     loan_type_display = serializers.SerializerMethodField()
     occupation_display = serializers.SerializerMethodField()
-
+    is_status_display = serializers.SerializerMethodField()
+    is_steps_display = serializers.SerializerMethodField()
+    
     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
     enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
     enquiry_verification = EnquiryVerificationSerializer(read_only=True)
@@ -69,7 +71,7 @@ class EnquirySerializer(serializers.ModelSerializer):
             "official_contact_number", "nature_of_service", "monthly_income",
             "business_name", "business_place", "business_contact_number",
             "nature_of_business", "income", "interested", "kyc_collected",
-            "kyc_document", "kyc_number", "is_status", "is_steps",
+            "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
             "enquiry_addresses", "enquiry_loan_details",
             "enquiry_verification", "enquiry_images", "enquiry_selfies",
         ]
@@ -80,3 +82,8 @@ class EnquirySerializer(serializers.ModelSerializer):
     def get_occupation_display(self, obj):
         return obj.get_occupation_display() if obj.occupation else None
 
+    def get_is_status_display(self, obj):
+        return obj.get_is_status_display() if obj.is_status is not None else None
+
+    def get_is_steps_display(self, obj):
+        return obj.get_is_steps_display() if obj.is_steps is not None else None

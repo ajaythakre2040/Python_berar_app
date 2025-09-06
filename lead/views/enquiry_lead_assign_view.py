@@ -136,3 +136,16 @@ class GetAssigned(APIView):
 
         serializer = EnquirySerializer(enquiries, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class GetAssignedCount(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        userId = request.user.id  
+        count = Enquiry.objects.filter(assign_to_id=userId).count()
+
+        return Response(
+            {"assigned_enquiry_count": count},
+            status=status.HTTP_200_OK
+        )

@@ -17,6 +17,9 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     loan_amount_range_display = serializers.SerializerMethodField()
     property_type_display = serializers.SerializerMethodField()
     property_document_type_display = serializers.SerializerMethodField()
+    loan_required_on_display = serializers.SerializerMethodField()
+    enquiry_type_display = serializers.SerializerMethodField()
+
 
     class Meta:
         model = EnquiryLoanDetails
@@ -33,11 +36,28 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
 
     def get_property_document_type_display(self, obj):
         return obj.property_document_type.name if obj.property_document_type else None
+    
+    def get_enquiry_type_display(self, obj):
+        return obj.get_enquiry_type_display() if obj.enquiry_type is not None else None
+    
+    def get_loan_required_on_display(self, obj):
+        return obj.get_loan_required_on_display()
+    
 
 class EnquiryVerificationSerializer(serializers.ModelSerializer):
+    mobile_status_display = serializers.SerializerMethodField()
+    email_status_display = serializers.SerializerMethodField()
+
     class Meta:
         model = EnquiryVerification
         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+
+    def get_mobile_status_display(self, obj):
+        return obj.get_mobile_status_display() if obj.mobile_status is not None else None
+
+    def get_email_status_display(self, obj):
+        return obj.get_email_status_display() if obj.email_status is not None else None
+
 
 class EnquiryImagesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,7 +74,7 @@ class EnquirySerializer(serializers.ModelSerializer):
     occupation_display = serializers.SerializerMethodField()
     is_status_display = serializers.SerializerMethodField()
     is_steps_display = serializers.SerializerMethodField()
-    
+
     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
     enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
     enquiry_verification = EnquiryVerificationSerializer(read_only=True)

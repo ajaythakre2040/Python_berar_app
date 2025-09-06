@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from constants import OtpType, SmsType, DeliveryStatus
+from constants import OtpType,  DeliveryStatus
 
 
 class OTP(models.Model):

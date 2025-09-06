@@ -19,7 +19,7 @@ from lead.views.configruation_view import ConfigurationListCreateAPIView, Config
 
 from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpdateAPIView, ActiveEnquiriesAPIView,ClosedEnquiriesAPIView,ReopenEnquiryView,AllCountAPIView, ThisMonthEnquiryListAPIView, TodayEnquiryListAPIView
 
-from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilterEmployeesAPIView, GetAssigned
+from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilterEmployeesAPIView, GetAssigned, GetAssignedCount
 
 from lead.views.enquiry_ticket_view import EnquiryTicketCreateAPIView, EnquiryTicketDetailAPIView
 
@@ -97,8 +97,10 @@ urlpatterns = [
     path("enquiries/today/", TodayEnquiryListAPIView.as_view(), name="enquiries-today"),
     path("enquiries/this-month/", ThisMonthEnquiryListAPIView.as_view(), name="enquiries-this-month"),
 
+    #Lead Assign
     path("enquiries/lead_assign/branch-employees/", GetBranchAndFilterEmployeesAPIView.as_view(), name="branch-employees"),
     path("enquiries/<int:enquiry_id>/lead_assign/", LeadAssignView.as_view(), name="lead-assign"),
+    path("enquiries/lead_assign/self-assigned-count/", GetAssignedCount.as_view(), name="lead-self-assign-count"),
 
     
     path("enquiries/assigned_lead/", GetAssigned.as_view(), name="lead-assign"),

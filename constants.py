@@ -243,6 +243,7 @@ TYPE_LOAN_REQUIRED_ON_CHOICES = [
     (TYPE_VEHICLE, "Vehicle"),
     (TYPE_PROPERTY, "Property"),
 ]
+
 class EmailType(models.IntegerChoices):
     ENQUIRY_VERIFICATION = 1, "Enquiry Verification OTP"
 
@@ -291,3 +292,4 @@ class TicketStatus(models.IntegerChoices):
     TICKET_OPEN = 1, "OPEN"
     TICKET_CLOSED = 2, "CLOSED"
     TICKET_ACTIVE = 3, "ACTIVE"
+    TICKET_REJECT = 4, "REJECT"

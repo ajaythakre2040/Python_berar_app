@@ -4,15 +4,20 @@ from django.conf.urls.static import static
 
 from lead.views.nature_of_business_views import NatureOfBusinessListCreateView, NatureOfBusinessDetailView
 from lead.views.product_type_views import ProductTypeListCreateView, ProductTypeDetailView
+
 from lead.views.property_type_views import PropertyTypeListCreateView, PropertyTypeDetailView
 from lead.views.property_document_views import PropertyDocumentListCreateView, PropertyDocumentDetailView
+
 from lead.views.loan_amount_range_views import LoanAmountRangeListCreateView, LoanAmountRangeDetailView
 
 from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView, EnquiryExistingDataAPIView
 from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
+
 from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
 from lead.views.enquiry_images_view import EnquiryImagesCreateAPIView, EnquiryImagesGetAPIView,EnquiryImagesDeleteAPIView,EnquiryImagesListAPIView
+
 from lead.views.enquiry_selfie_view import EnquirySelfieCreateAPIView, EnquirySelfieReplaceAPIView,  EnquirySelfieDeleteAPIView, EnquirySelfieListAPIView,  EnquirySelfieGetAPIView
+
 from lead.views.enquiry_verification_view import EnquiryVerificationCreateAPIView , otpVerificationAPIView,EnquiryVerificationCompleteAPIView
 
 from lead.views.configruation_view import ConfigurationListCreateAPIView, ConfigurationDetailAPIView
@@ -22,7 +27,7 @@ from lead.views.enquiry_followup import EnquiryFollowUpCountAPIView, FollowUpUpd
 from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilterEmployeesAPIView, GetAssigned, GetAssignedCount
 
 from lead.views.enquiry_ticket_view import EnquiryTicketCreateAPIView, EnquiryTicketDetailAPIView
-
+from lead.views.enquiry_end_user_view import EnquiryEndUserCreateView, EnquiryEnduserDetailView
 
 urlpatterns = [
 
@@ -107,7 +112,11 @@ urlpatterns = [
 
     #LEAD ENQUIRY TICKETS
     path("enquiries/ticket/", EnquiryTicketCreateAPIView.as_view(), name="enquiries-ticket-create"),
-    path("enquiries/ticket/<int:ticket_id>/", EnquiryTicketDetailAPIView.as_view(), name="enquiries-ticket-get-by-id")
+    path("enquiries/ticket/<int:ticket_id>/", EnquiryTicketDetailAPIView.as_view(), name="enquiries-ticket-get-by-id"),
     
+     #END USER 
+    path("enquiries/end-user/", EnquiryEndUserCreateView.as_view(), name="property-type-list-create"),
+    path("enquiries/end-user/<int:pk>/", EnquiryEnduserDetailView.as_view(), name="property-type-detail"),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

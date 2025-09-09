@@ -6,7 +6,7 @@ from lead.models.property_type import PropertyType
 from lead.models.property_document import PropertyDocument
 from django.utils import timezone
 from constants import ENQUIRY_TYPE_CHOICES , TYPE_LOAN_REQUIRED_ON_CHOICES
-
+from lead.models.enquiry_end_user  import EnquiryEnduser
 
 class EnquiryLoanDetails(models.Model):
 
@@ -36,6 +36,14 @@ class EnquiryLoanDetails(models.Model):
 
     remark = models.TextField(null=True, blank=True)
 
+    end_user = models.ForeignKey(
+        EnquiryEnduser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None  
+    )
+    
     created_by = models.IntegerField()
     created_at = models.DateTimeField(default=timezone.now)
 

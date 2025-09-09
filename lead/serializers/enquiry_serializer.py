@@ -19,6 +19,7 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     property_document_type_display = serializers.SerializerMethodField()
     loan_required_on_display = serializers.SerializerMethodField()
     enquiry_type_display = serializers.SerializerMethodField()
+    end_user_display = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -42,6 +43,9 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     
     def get_loan_required_on_display(self, obj):
         return obj.get_loan_required_on_display()
+    
+    def get_end_user_display(self, obj):
+        return str(obj.end_user) if obj.end_user else None
     
 
 class EnquiryVerificationSerializer(serializers.ModelSerializer):
@@ -74,6 +78,8 @@ class EnquirySerializer(serializers.ModelSerializer):
     occupation_display = serializers.SerializerMethodField()
     is_status_display = serializers.SerializerMethodField()
     is_steps_display = serializers.SerializerMethodField()
+    nature_of_business_display = serializers.SerializerMethodField()
+
 
     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
     enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
@@ -90,7 +96,7 @@ class EnquirySerializer(serializers.ModelSerializer):
             "employer_name", "number_of_years_service",
             "official_contact_number", "nature_of_service", "monthly_income",
             "business_name", "business_place", "business_contact_number",
-            "nature_of_business", "income", "interested", "kyc_collected",
+            "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
             "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
             "enquiry_addresses", "enquiry_loan_details",
             "enquiry_verification", "enquiry_images", "enquiry_selfies",
@@ -107,3 +113,6 @@ class EnquirySerializer(serializers.ModelSerializer):
 
     def get_is_steps_display(self, obj):
         return obj.get_is_steps_display() if obj.is_steps is not None else None
+    
+    def get_nature_of_business_display(self, obj):
+        return obj.nature_of_business.name if obj.nature_of_business else None

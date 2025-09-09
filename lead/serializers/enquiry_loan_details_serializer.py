@@ -10,6 +10,7 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     enquiry_display = serializers.SerializerMethodField()
     loan_required_on_display = serializers.SerializerMethodField()
     enquiry_type_display = serializers.SerializerMethodField()
+    end_user_display = serializers.SerializerMethodField()
 
     enquiry = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -38,7 +39,9 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
             "followup_pickup_date",
             "enquiry_type",
             "enquiry_type_display",
-            "remark"
+            "remark",
+            "end_user",
+            "end_user_display",   # ✅ include it
         ]
         read_only_fields = (
             "enquiry",
@@ -47,7 +50,8 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
             "property_type_display",
             "loan_amount_range_display",
             "enquiry_type_display",
-            "loan_required_on_display",  # ✅ Optional: make it read-only
+            "loan_required_on_display",
+            "end_user_display",
         )
 
     def get_loan_amount_range_display(self, obj):
@@ -63,3 +67,6 @@ class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     
     def get_loan_required_on_display(self, obj):
         return obj.get_loan_required_on_display()
+        
+    def get_end_user_display(self, obj):
+        return str(obj.end_user) if obj.end_user else None

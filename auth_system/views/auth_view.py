@@ -193,6 +193,8 @@ class LoginView(APIView):
         elif "@" in username:
             return TblUser.objects.filter(email=username).first()
         return None
+    
+    
 
     def _log_failed_attempt(self, user, username, ip, agent_browser):
         user.login_attempt += 1

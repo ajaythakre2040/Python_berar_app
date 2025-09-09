@@ -6,7 +6,7 @@ from constants import OCCUPATION_CHOICES
 from constants import PercentageStatus
 from constants import EnquiryStatus
 from ems.models.emp_basic_profile import TblEmpBasicProfile
-
+from lead.models.nature_of_business import NatureOfBusiness
 class Enquiry(models.Model):
 
 
@@ -27,8 +27,10 @@ class Enquiry(models.Model):
     business_name = models.CharField(max_length=255, null=True, blank=True)
     business_place = models.CharField(max_length=255, null=True, blank=True)
     business_contact_number = models.CharField(max_length=15, null=True, blank=True)
-    nature_of_business = models.CharField(max_length=100, null=True, blank=True)
+    nature_of_business = models.ForeignKey(NatureOfBusiness, on_delete=models.SET_NULL, null=True, blank=True)
+    
     income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
 
     interested = models.BooleanField(default=False)
     kyc_collected = models.BooleanField(default=False)

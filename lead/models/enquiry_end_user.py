@@ -11,6 +11,6 @@ class EnquiryEnduser(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.title   
     class Meta:
         db_table = "lead_enquiry_end_user" 

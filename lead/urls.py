@@ -29,6 +29,8 @@ from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilt
 from lead.views.enquiry_ticket_view import EnquiryTicketCreateAPIView, EnquiryTicketDetailAPIView
 from lead.views.enquiry_end_user_view import EnquiryEndUserCreateView, EnquiryEnduserDetailView
 
+from lead.views.enquiry_reports import EnquiryReportDownloadAPIView, EnquiryReportAPIView
+
 urlpatterns = [
 
     #NatureOfBusiness
@@ -106,8 +108,6 @@ urlpatterns = [
     path("enquiries/lead_assign/branch-employees/", GetBranchAndFilterEmployeesAPIView.as_view(), name="branch-employees"),
     path("enquiries/<int:enquiry_id>/lead_assign/", LeadAssignView.as_view(), name="lead-assign"),
     path("enquiries/lead_assign/self-assigned-count/", GetAssignedCount.as_view(), name="lead-self-assign-count"),
-
-    
     path("enquiries/assigned_lead/", GetAssigned.as_view(), name="lead-assign"),
 
     #LEAD ENQUIRY TICKETS
@@ -117,6 +117,12 @@ urlpatterns = [
      #END USER 
     path("enquiries/end-user/", EnquiryEndUserCreateView.as_view(), name="property-type-list-create"),
     path("enquiries/end-user/<int:pk>/", EnquiryEnduserDetailView.as_view(), name="property-type-detail"),
+
+    #Reports
+
+    path("enquiries/reports/", EnquiryReportAPIView.as_view(), name="enquiry-reports"),
+    path("enquiries/reports/download/", EnquiryReportDownloadAPIView.as_view(), name="enquiry-reports"),
+
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

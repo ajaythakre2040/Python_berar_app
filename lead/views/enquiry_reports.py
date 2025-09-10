@@ -61,17 +61,24 @@ class EnquiryReportAPIView(APIView):
 
         enquiries = Enquiry.objects.filter(filters).order_by("id")
 
-        paginator = CustomPagination()
-        page_data = paginator.paginate_queryset(enquiries, request)
-        serializer = EnquirySerializer(page_data, many=True)
+        # paginator = CustomPagination()
+        # page_data = paginator.paginate_queryset(enquiries, request)
+        # serializer = EnquirySerializer(page_data, many=True)
+        serializer = EnquirySerializer(enquiries, many=True)
 
-        return paginator.get_custom_paginated_response(
-            data=serializer.data,
-            extra_fields={
-                "success": True,
-                "message": "Enquiries report retrieved successfully (paginated).",
-            }
-        )
+        # return paginator.get_custom_paginated_response(
+        #     data=serializer.data,
+        #     extra_fields={
+        #         "success": True,
+        #         "message": "Enquiries report retrieved successfully (paginated).",
+        #     }
+        # )
+
+        return Response({
+            "success": True,
+            "message": "Enquiries report retrieved successfully.",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 

@@ -3,7 +3,7 @@ from auth_system.models.email_logs import EmailLogs
 from auth_system.models.otp import OTP
 from auth_system.models.sms_log import SmsLog
 from auth_system.utils.common import generate_otp, otp_expiry_time, generate_request_id
-from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link,send_enquiry_otp_to_mobile
+from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link,send_enquiry_otp_to_mobile , send_seized_emp_otp
 from constants import EmailType, OtpType, SmsType, DeliveryStatus
 
 

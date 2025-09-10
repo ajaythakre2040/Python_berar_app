@@ -14,7 +14,8 @@ class EnquirySelfie(models.Model):
     enquiry = models.ForeignKey(Enquiry, on_delete=models.CASCADE, related_name="enquiry_selfies")
 
     premises_type = models.CharField(max_length=100)
-    employee_id = models.IntegerField()
+    # employee_id = models.IntegerField()
+    employee_code = models.CharField()
 
     capture_date = models.DateField(editable=False)
     capture_time = models.TimeField(editable=False)

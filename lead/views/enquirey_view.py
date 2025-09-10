@@ -22,6 +22,7 @@ class EnquiryListCreateAPIView(APIView):
         search_query = request.query_params.get("search", None)
         count_only = request.query_params.get("count_only") == "true"
 
+        # 🔎 Apply search filter
         if search_query:
             enquiries = Enquiry.objects.filter(
                 Q(name__icontains=search_query) |
@@ -30,7 +31,10 @@ class EnquiryListCreateAPIView(APIView):
             )
         else:
             enquiries = Enquiry.objects.filter(deleted_at__isnull=True)
+
         total_count = enquiries.count()
+
+        # ✅ If only count required
         if count_only:
             return Response({
                 "success": True,
@@ -39,29 +43,20 @@ class EnquiryListCreateAPIView(APIView):
             }, status=status.HTTP_200_OK)
 
         enquiries = enquiries.order_by("id")
-        paginator = CustomPagination()
-        page_size = request.query_params.get("page_size")
-        page = request.query_params.get("page")
 
-        if page or page_size:
-            page_data = paginator.paginate_queryset(enquiries, request)
-            serializer = EnquirySerializer(page_data, many=True)
-            return paginator.get_custom_paginated_response(
-                data=serializer.data,
-                extra_fields={
-                    "success": True,
-                    "message": "Enquiries retrieved successfully (paginated).",
-                    "total_count": total_count
-                }
-            )
-        else:
-            serializer = EnquirySerializer(enquiries, many=True)
-            return Response({
+        # ✅ Always apply pagination
+        paginator = CustomPagination()
+        page_data = paginator.paginate_queryset(enquiries, request)
+        serializer = EnquirySerializer(page_data, many=True)
+
+        return paginator.get_custom_paginated_response(
+            data=serializer.data,
+            extra_fields={
                 "success": True,
-                "message": "Enquiries retrieved successfully.",
-                "total_count": total_count,
-                "data": serializer.data,
-            }, status=status.HTTP_200_OK)
+                "message": "Enquiries retrieved successfully (paginated).",
+                "total_count": total_count
+            }
+        )
 
     def post(self, request):
         serializer = EnquirySerializer(data=request.data)

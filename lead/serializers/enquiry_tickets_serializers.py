@@ -9,7 +9,9 @@ class EnquiryTicketSerializer(serializers.ModelSerializer):
     )
     status_display = serializers.CharField(source="get_status_display", read_only=True)
 
-    attachment = serializers.FileField(use_url=False, read_only=True)
+    # attachment = serializers.FileField(use_url=False, read_only=True)
+    attachment = serializers.FileField(required=False, use_url=True)
+
     class Meta:
         model = EnquiryTickets
         exclude = (

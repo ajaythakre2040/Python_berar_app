@@ -29,7 +29,7 @@ from lead.views.enquiry_lead_assign_view import LeadAssignView, GetBranchAndFilt
 from lead.views.enquiry_ticket_view import EnquiryTicketCreateAPIView, EnquiryTicketDetailAPIView
 from lead.views.enquiry_end_user_view import EnquiryEndUserCreateView, EnquiryEnduserDetailView
 
-from lead.views.enquiry_reports import EnquiryReportDownloadAPIView, EnquiryReportAPIView
+from lead.views.enquiry_reports import EnquiryReportAPIView, EnquiryReportDownloadAPIView
 
 urlpatterns = [
 

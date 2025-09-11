@@ -21,7 +21,7 @@ class EnquiryImages(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     document_types = models.IntegerField()
-    document_sub_types = models.IntegerField()
+    document_sub_types = models.IntegerField(null=True, blank=True)
     premises_type = models.CharField(max_length=100)
 
     media_file = models.FileField(upload_to=image_upload_path)

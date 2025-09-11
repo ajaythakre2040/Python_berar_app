@@ -12,7 +12,7 @@ class LoanAmountRange(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Loan Range: {self.loan_amount_from} - {self.loan_amount_to}"
+        return f"{self.loan_amount_from} - {self.loan_amount_to}"
 
     class Meta:
         db_table = "lead_loan_amount_range" 

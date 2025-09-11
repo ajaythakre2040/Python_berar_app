@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from lead.models.enquiry import Enquiry
 from lead.models.enquiry_address import EnquiryAddress
@@ -6,6 +5,8 @@ from lead.models.enquiry_loan_details import EnquiryLoanDetails
 from lead.models.enquiry_verifications import EnquiryVerification
 from lead.models.enquiry_images import EnquiryImages
 from lead.models.enquiry_selfie import EnquirySelfie
+from ems.models.emp_basic_profile import TblEmpBasicProfile
+
 
 class EnquiryAddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,6 +81,11 @@ class EnquirySerializer(serializers.ModelSerializer):
     is_steps_display = serializers.SerializerMethodField()
     nature_of_business_display = serializers.SerializerMethodField()
 
+    created_by = serializers.IntegerField(read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    created_by_code = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()   # ✅ instead of IntegerField
+
 
     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
     enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
@@ -99,7 +105,7 @@ class EnquirySerializer(serializers.ModelSerializer):
             "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
             "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
             "enquiry_addresses", "enquiry_loan_details",
-            "enquiry_verification", "enquiry_images", "enquiry_selfies",
+            "enquiry_verification", "enquiry_images", "enquiry_selfies","created_by", "created_by_name", "created_by_code","created_at"
         ]
 
     def get_loan_type_display(self, obj):
@@ -116,3 +122,18 @@ class EnquirySerializer(serializers.ModelSerializer):
     
     def get_nature_of_business_display(self, obj):
         return obj.nature_of_business.name if obj.nature_of_business else None
+    
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            emp = TblEmpBasicProfile.objects.filter(id=obj.created_by).first()
+            return emp.name if emp else None
+        return None
+
+    def get_created_by_code(self, obj):
+        if obj.created_by:
+            emp = TblEmpBasicProfile.objects.filter(id=obj.created_by).first()
+            return emp.employee_code if emp else None
+        return None
+    
+    def get_created_at(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d") if obj.created_at else None

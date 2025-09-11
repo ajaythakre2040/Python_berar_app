@@ -10,7 +10,7 @@ from lead.views.property_document_views import PropertyDocumentListCreateView, P
 
 from lead.views.loan_amount_range_views import LoanAmountRangeListCreateView, LoanAmountRangeDetailView
 
-from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView, EnquiryExistingDataAPIView
+from lead.views.enquirey_view import EnquiryListCreateAPIView, EnquiryDetailView, EnquiryExistingDataAPIView, EnquiryDraftAPIView
 from lead.views.enquiry_address_view import EnquiryAddressCreateAPIView
 
 from lead.views.enquiry_loan_details_view import EnquiryLoanDetailsCreateAPIView
@@ -55,6 +55,7 @@ urlpatterns = [
 
     #Lead Enquiries
     path("enquiries/", EnquiryListCreateAPIView.as_view(), name="enquiry-list-create"),
+    path("enquiries/draft", EnquiryDraftAPIView.as_view(), name="enquiry-pending"),
     path("enquiries/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry-detail"),
 
     #Lead Address

@@ -15,7 +15,7 @@ class EnquirySelfie(models.Model):
 
     premises_type = models.CharField(max_length=100)
     # employee_id = models.IntegerField()
-    employee_code = models.CharField()
+    employee_code = models.CharField(max_length=100, null=True, blank=True)
 
     capture_date = models.DateField(editable=False)
     capture_time = models.TimeField(editable=False)

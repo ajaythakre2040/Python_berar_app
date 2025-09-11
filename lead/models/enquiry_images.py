@@ -12,7 +12,7 @@ def image_upload_path(instance, filename):
 class EnquiryImages(models.Model):
     enquiry = models.ForeignKey(Enquiry, on_delete=models.CASCADE, related_name="enquiry_images")
 
-    employee_id = models.IntegerField()
+    employee_code = models.CharField(max_length=100, null=True, blank=True)
     capture_date = models.DateField(editable=False)
     capture_time = models.TimeField(editable=False)
 
@@ -22,7 +22,7 @@ class EnquiryImages(models.Model):
 
     document_types = models.IntegerField()
     document_sub_types = models.IntegerField()
-    premises_type = models.IntegerField()
+    premises_type = models.CharField(max_length=100)
 
     media_file = models.FileField(upload_to=image_upload_path)
 

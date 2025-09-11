@@ -12,6 +12,12 @@ from lead.models.enquiry import Enquiry
 from lead.serializers.enquiry_serializer import EnquirySerializer
 from auth_system.utils.pagination import CustomPagination
 from django.http import HttpResponse
+from auth_system.models.user import TblUser  
+from ems.models.branch import TblBranch
+
+# from ems.models.emp_basic_profile import TblEmpBasicProfile
+from django.shortcuts import get_object_or_404
+
 import pandas as pd
 
 class EnquiryReportAPIView(APIView):
@@ -28,7 +34,6 @@ class EnquiryReportAPIView(APIView):
 
         filters = Q()
 
-        # Date validation
         if from_date and not to_date:
             return Response({
                 "success": False,
@@ -95,7 +100,10 @@ class EnquiryReportDownloadAPIView(APIView):
 
         filters = Q()
         if from_date and not to_date:
-            return Response({"success": False, "message": "Please select 'to_date' when using 'from_date'."}, status=400)
+            return Response(
+                {"success": False, "message": "Please select 'to_date' when using 'from_date'."},
+                status=400
+            )
 
         if to_date:
             to_date = parse_date(to_date)
@@ -115,48 +123,79 @@ class EnquiryReportDownloadAPIView(APIView):
         enquiries = Enquiry.objects.filter(filters).order_by("id")
         serializer = EnquirySerializer(enquiries, many=True)
 
+        user_ids = {enq.get("created_by") for enq in serializer.data if enq.get("created_by")}
+        users = TblUser.objects.filter(id__in=user_ids).values(
+            "id", "full_name", "employee_code", "branch_id"
+        )
+        user_map = {u["id"]: u for u in users}
+
+        branch_ids = {u["branch_id"] for u in users if u.get("branch_id")}
+        branches = TblBranch.objects.filter(id__in=branch_ids).values("id", "branch_name", "branch_code")
+        branch_map = {b["id"]: b for b in branches}
+
         cleaned_data = []
         for enquiry in serializer.data:
+            user = user_map.get(enquiry.get("created_by"))
+            branch = branch_map.get(user["branch_id"]) if user else None
+
             row = {
-                "ID": enquiry.get("id"),
-                "Name": enquiry.get("name"),
-                "Mobile Number": enquiry.get("mobile_number"),
-                "LAN Number": enquiry.get("lan_number"),
-                "Occupation": enquiry.get("occupation_display"),
-                "Employer": enquiry.get("employer_name"),
-                "Monthly Income": enquiry.get("monthly_income"),
-                "KYC Document": enquiry.get("kyc_document"),
-                "KYC Number": enquiry.get("kyc_number"),
-                "Status": enquiry.get("is_status_display"),
-                "Steps": enquiry.get("is_steps_display"),
+                "Survey Date": enquiry.get("created_at"),
+                "Branch Name": branch["branch_name"] if branch else None,
+                "Product": None,  
+                "Employee Name": user["full_name"] if user else None,
+                "Employee Code": user["employee_code"] if user else None,
+                "Customer Name": enquiry.get("name"),
+                "Business Name": enquiry.get("business_name"),
+                "Business Place": enquiry.get("business_place"),
+                "Nature of Business": enquiry.get("nature_of_business_display"),
+                "Customer Contact": enquiry.get("mobile_number"),
+                "Interested": "Yes" if enquiry.get("interested") else "No",
+                "KYC Collected": "Yes" if enquiry.get("kyc_collected") else "No",
+                "Loan Demand": None,
+                "Property Type": None,
+                "Property Value": None,
+                "Loan Required On": None,
+                "Enquiry Type": None,
+                "Remark": None,
             }
 
             if enquiry.get("enquiry_loan_details"):
                 loan = enquiry["enquiry_loan_details"][0]
                 row.update({
-                    "Loan Type": loan.get("loan_type_display"),
-                    "Loan Amount Range": loan.get("loan_amount_range_display"),
+                    "Product": loan.get("loan_type_display"),
+                    "Loan Demand": loan.get("loan_amount_range_display"),
                     "Property Type": loan.get("property_type_display"),
-                    "Property Document": loan.get("property_document_type_display"),
-                    "Loan Required On": loan.get("loan_required_on_display"),
-                    "Enquiry Type": loan.get("enquiry_type_display"),
                     "Property Value": loan.get("property_value"),
+                    "Loan Required On": loan.get("followup_pickup_date"),
+                    "Enquiry Type": loan.get("enquiry_type_display"),
                     "Remark": loan.get("remark"),
-                })
-
-            if enquiry.get("enquiry_verification"):
-                ver = enquiry["enquiry_verification"]
-                row.update({
-                    "Mobile": ver.get("mobile"),
-                    "Mobile Status": ver.get("mobile_status_display"),
-                    "Email": ver.get("email"),
-                    "Email Status": ver.get("email_status_display"),
-                    "Aadhaar Verified": ver.get("aadhaar_verified"),
                 })
 
             cleaned_data.append(row)
 
+        columns = [
+            "Survey Date",
+            "Branch Name",
+            "Product",
+            "Employee Name",
+            "Employee Code",
+            "Customer Name",
+            "Business Name",
+            "Business Place",
+            "Nature of Business",
+            "Customer Contact",
+            "Interested",
+            "KYC Collected",
+            "Loan Demand",
+            "Property Type",
+            "Property Value",
+            "Loan Required On",
+            "Enquiry Type",
+            "Remark",
+        ]
+
         df = pd.DataFrame(cleaned_data)
+        df = df[columns] 
 
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename="enquiries_report.xlsx"'

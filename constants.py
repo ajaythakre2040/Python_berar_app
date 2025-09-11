@@ -220,11 +220,10 @@ class PercentageStatus(models.IntegerChoices):
 
 class EnquiryStatus(models.IntegerChoices):
     DRAFT = 0, "Draft"
-    SUBMITTED = 1, "Submitted"
-    ACTIVE = 2, "Active"  # or 'Verified' — choose one
-    CLOSED = 3, "Closed"
-    REJECT = 4, "Reject"
-    RE_OPEN = 5, "Re Open"
+    ACTIVE = 1, "Active"  # or 'Verified' — choose one
+    CLOSED = 2, "Closed"
+    REJECT = 3, "Reject"
+    RE_OPEN = 4, "Re Open"
 
 
 # --- Enquiry Types ---

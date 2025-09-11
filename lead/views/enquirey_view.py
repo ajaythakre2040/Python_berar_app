@@ -22,7 +22,6 @@ class EnquiryListCreateAPIView(APIView):
         search_query = request.query_params.get("search", None)
         count_only = request.query_params.get("count_only") == "true"
 
-        # 🔎 Apply search filter
         if search_query:
             enquiries = Enquiry.objects.filter(
                 Q(name__icontains=search_query) |
@@ -30,11 +29,10 @@ class EnquiryListCreateAPIView(APIView):
                 deleted_at__isnull=True
             )
         else:
-            enquiries = Enquiry.objects.filter(deleted_at__isnull=True)
+            enquiries = Enquiry.objects.filter(deleted_at__isnull=True, is_status=EnquiryStatus.ACTIVE)
 
         total_count = enquiries.count()
 
-        # ✅ If only count required
         if count_only:
             return Response({
                 "success": True,
@@ -44,7 +42,6 @@ class EnquiryListCreateAPIView(APIView):
 
         enquiries = enquiries.order_by("id")
 
-        # ✅ Always apply pagination
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(enquiries, request)
         serializer = EnquirySerializer(page_data, many=True)
@@ -151,8 +148,46 @@ class EnquiryExistingDataAPIView(APIView):
         if mobile:
             params["mobileNumber"] = mobile
 
-        # ✅ call_mis_api already handles errors, timeouts, and response formatting
         return call_mis_api(
             request, CUSTOMER_GET_BY_ACCOUNT_URL, params=params, timeout=30
         )
 
+class EnquiryDraftAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request):
+        search_query = request.query_params.get("search", None)
+        count_only = request.query_params.get("count_only") == "true"
+
+        if search_query:
+            enquiries = Enquiry.objects.filter(
+                Q(name__icontains=search_query) |
+                Q(mobile_number__icontains=search_query),
+                deleted_at__isnull=True
+            )
+        else:
+            enquiries = Enquiry.objects.filter(deleted_at__isnull=True, is_status=EnquiryStatus.DRAFT)
+
+        total_count = enquiries.count()
+
+        if count_only:
+            return Response({
+                "success": True,
+                "message": "Total draft enquiry count retrieved.",
+                "total_counts": total_count
+            }, status=status.HTTP_200_OK)
+
+        enquiries = enquiries.order_by("id")
+
+        paginator = CustomPagination()
+        page_data = paginator.paginate_queryset(enquiries, request)
+        serializer = EnquirySerializer(page_data, many=True)
+
+        return paginator.get_custom_paginated_response(
+            data=serializer.data,
+            extra_fields={
+                "success": True,
+                "message": "Draft Enquiries retrieved successfully (paginated).",
+                "total_count": total_count
+            }
+        )

@@ -119,7 +119,7 @@ class EnquirySelfieReplaceAPIView(APIView):
             and enquiry.enquiry_selfies.exists()
         )
         if all_data_present:
-            enquiry.is_status = EnquiryStatus.SUBMITTED
+            enquiry.is_status = EnquiryStatus.ACTIVE
         enquiry.save()
 
         LeadLog.objects.create(

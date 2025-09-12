@@ -75,7 +75,7 @@ class EnquirySelfieSerializer(serializers.ModelSerializer):
         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
 
 class EnquirySerializer(serializers.ModelSerializer):
-    loan_type_display = serializers.SerializerMethodField()
+    # loan_type_display = serializers.SerializerMethodField()
     occupation_display = serializers.SerializerMethodField()
     is_status_display = serializers.SerializerMethodField()
     is_steps_display = serializers.SerializerMethodField()
@@ -95,9 +95,20 @@ class EnquirySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Enquiry
+        # fields = [
+        #     "id", "name", "mobile_number", "lan_number",
+        #     "loan_type", "loan_type_display",
+        #     "occupation", "occupation_display",
+        #     "employer_name", "number_of_years_service",
+        #     "official_contact_number", "nature_of_service", "monthly_income",
+        #     "business_name", "business_place", "business_contact_number",
+        #     "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
+        #     "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
+        #     "enquiry_addresses", "enquiry_loan_details",
+        #     "enquiry_verification", "enquiry_images", "enquiry_selfies","created_by", "created_by_name", "created_by_code","created_at"
+        # ]
         fields = [
             "id", "name", "mobile_number", "lan_number",
-            "loan_type", "loan_type_display",
             "occupation", "occupation_display",
             "employer_name", "number_of_years_service",
             "official_contact_number", "nature_of_service", "monthly_income",
@@ -108,8 +119,8 @@ class EnquirySerializer(serializers.ModelSerializer):
             "enquiry_verification", "enquiry_images", "enquiry_selfies","created_by", "created_by_name", "created_by_code","created_at"
         ]
 
-    def get_loan_type_display(self, obj):
-        return obj.loan_type.name if obj.loan_type else None
+    # def get_loan_type_display(self, obj):
+    #     return obj.loan_type.name if obj.loan_type else None
 
     def get_occupation_display(self, obj):
         return obj.get_occupation_display() if obj.occupation else None

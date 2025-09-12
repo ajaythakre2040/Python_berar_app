@@ -14,6 +14,7 @@ from constants import EnquiryStatus
 from lead.models.lead_logs import LeadLog  
 from api_endpoints import CUSTOMER_GET_BY_ACCOUNT_URL
 from lead.utils.mis_helpers import call_mis_api
+from datetime import date
 
 class EnquiryListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -188,6 +189,55 @@ class EnquiryDraftAPIView(APIView):
             extra_fields={
                 "success": True,
                 "message": "Draft Enquiries retrieved successfully (paginated).",
+                "total_count": total_count
+            }
+        )
+
+
+class EnquiryTodayDraftAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTokenValid]
+
+    def get(self, request, *args, **kwargs):
+        search_query = request.query_params.get("search", None)
+        count_only = request.query_params.get("count_only") == "true"
+
+        today = date.today()
+
+        if search_query:
+            enquiries = Enquiry.objects.filter(
+                Q(name__icontains=search_query) |
+                Q(mobile_number__icontains=search_query),
+                deleted_at__isnull=True,
+                is_status=EnquiryStatus.DRAFT,
+                created_at__date=today 
+            )
+        else:
+            enquiries = Enquiry.objects.filter(
+                deleted_at__isnull=True,
+                is_status=EnquiryStatus.DRAFT,
+                created_at__date=today  
+            )
+
+        total_count = enquiries.count()
+
+        if count_only:
+            return Response({
+                "success": True,
+                "message": "Today's draft enquiry count retrieved.",
+                "total_counts": total_count
+            }, status=status.HTTP_200_OK)
+
+        enquiries = enquiries.order_by("id")
+
+        paginator = CustomPagination()
+        page_data = paginator.paginate_queryset(enquiries, request)
+        serializer = EnquirySerializer(page_data, many=True)
+
+        return paginator.get_custom_paginated_response(
+            data=serializer.data,
+            extra_fields={
+                "success": True,
+                "message": "Today's Draft Enquiries retrieved successfully (paginated).",
                 "total_count": total_count
             }
         )

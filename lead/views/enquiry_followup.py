@@ -26,7 +26,6 @@ class EnquiryFollowUpCountAPIView(APIView):
         today = date.today()
         count_only = request.query_params.get("count_only") == "true"
 
-        # ✅ Sirf aaj ki date ke records
         loan_qs = EnquiryLoanDetails.objects.filter(
             followup_pickup_date=today,
             enquiry__deleted_at__isnull=True
@@ -35,7 +34,6 @@ class EnquiryFollowUpCountAPIView(APIView):
         enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
         enquiries = Enquiry.objects.filter(id__in=enquiry_ids)
 
-        # ✅ Log entry banani ho to sirf aaj ke liye
         for loan_detail in loan_qs:
             LeadLog.objects.get_or_create(
                 enquiry_id=loan_detail.enquiry_id,
@@ -119,7 +117,6 @@ class FollowUpUpdateAPIView(APIView):
             "message": "Follow-up updated successfully."
         }, status=status.HTTP_200_OK)
 
-
 class ActiveEnquiriesAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
   
@@ -151,7 +148,6 @@ class ActiveEnquiriesAPIView(APIView):
             "message": "Active enquiries retrieved successfully.",
             "data": serializer.data
         })
-
 
 class ClosedEnquiriesAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -186,7 +182,6 @@ class ClosedEnquiriesAPIView(APIView):
             "data": serializer.data
         })
     
-
 class ReopenEnquiryView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -232,7 +227,6 @@ class ReopenEnquiryView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-
 class LeadAssignView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -288,7 +282,6 @@ class LeadAssignView(APIView):
             status=status.HTTP_200_OK
         )
 
-
 class AllCountAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -311,6 +304,17 @@ class AllCountAPIView(APIView):
             deleted_at__isnull=True
         ).count()
 
+        total_draft_count = Enquiry.objects.filter(
+            is_status=EnquiryStatus.DRAFT,
+            deleted_at__isnull=True
+        ).count()
+
+        today_draft_count = Enquiry.objects.filter(
+            is_status=EnquiryStatus.DRAFT,
+            deleted_at__isnull=True,
+            created_at__date=today
+        ).count()
+
         return Response({
             "success": True,
             "message": "Enquiry counts retrieved successfully.",
@@ -320,17 +324,19 @@ class AllCountAPIView(APIView):
                 enquiry__deleted_at__isnull=True
             ).values("enquiry_id").distinct().count(),
             "total_active_count": Enquiry.objects.filter(
-                is_status=EnquiryStatus.ACTIVE, deleted_at__isnull=True
+                is_status=EnquiryStatus.ACTIVE,
+                deleted_at__isnull=True
             ).count(),
             "total_closed_count": Enquiry.objects.filter(
-                is_status=EnquiryStatus.CLOSED, deleted_at__isnull=True
+                is_status=EnquiryStatus.CLOSED,
+                deleted_at__isnull=True
             ).count(),
-            "today_followup_count": today_followups,   
-            "today_created_count": today_created,   
-            "current_month_count": this_month_created   
-
+            "total_draft_count": total_draft_count,
+            "today_draft_count": today_draft_count,
+            "today_followup_count": today_followups,
+            "today_created_count": today_created,
+            "current_month_count": this_month_created
         }, status=status.HTTP_200_OK)
-    
 
 class ThisMonthEnquiryListAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]

@@ -14,6 +14,7 @@ from ems.views.designation_view import (
     TblDesignationDetailView,
 )
 
+from ems.views.import_emp_csv_view import UploadCSVView
 from ems.views.menu_view import (
     MenuListCreateView,
     MenuDetailView,
@@ -153,6 +154,7 @@ urlpatterns = [
     ),
     path("states/", StateListCreateAPIView.as_view(), name="state-list-create"),
     path("states/<int:pk>/", StateDetailAPIView.as_view(), name="state-detail"),
+    path("upload-Empcsv/", UploadCSVView.as_view(), name="upload-csv"),
 ]
 
 

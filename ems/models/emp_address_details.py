@@ -4,18 +4,18 @@ from django.utils import timezone
 
 
 class TblEmpAddressDetails(models.Model):
-    
+
     employee_id = models.OneToOneField(
         TblEmpBasicProfile,
         on_delete=models.CASCADE,
         related_name="address",
         db_column="employee_id",
     )
-    state = models.CharField(max_length=200)
-    district = models.CharField(max_length=200)
-    city = models.CharField(max_length=200)
-    address = models.CharField(max_length=355)
-    pincode = models.CharField(max_length=20)
+    state = models.CharField(max_length=200, null=True, blank=True)
+    district = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=200, null=True, blank=True)
+    address = models.CharField(max_length=355, null=True, blank=True)
+    pincode = models.CharField(max_length=20, null=True, blank=True)
     longitude = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
     )

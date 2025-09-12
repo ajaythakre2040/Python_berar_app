@@ -3,21 +3,28 @@ from auth_system.models.email_logs import EmailLogs
 from auth_system.models.otp import OTP
 from auth_system.models.sms_log import SmsLog
 from auth_system.utils.common import generate_otp, otp_expiry_time, generate_request_id
-from auth_system.utils.sms_utils import send_enquiry_otp_to_email,send_link,send_enquiry_otp_to_mobile , send_seized_emp_otp
+from auth_system.utils.sms_utils import (
+    send_enquiry_otp_to_email,
+    send_link,
+    send_enquiry_otp_to_mobile,
+    send_seized_emp_otp,
+    send_seized_leadApp_otp,
+)
 from constants import EmailType, OtpType, SmsType, DeliveryStatus
 
 
-def send_login_otp(user):
+def send_login_otp(user, app_signature):
     otp_code = generate_otp()
     expiry = otp_expiry_time()
     request_id = generate_request_id()
     mobile = user.mobile_number
-    # sms_status = (
-    #     DeliveryStatus.DELIVERED
-    #     if send_seized_emp_otp(mobile, otp_code)
-    #     else DeliveryStatus.FAILED
-    # )
-    sms_status = DeliveryStatus.DELIVERED
+   
+    response = send_seized_leadApp_otp(mobile, otp_code, app_signature)
+    sms_status = (
+        DeliveryStatus.DELIVERED if "error" not in response else DeliveryStatus.FAILED
+    )
+
+    # sms_status = DeliveryStatus.DELIVERED
     OTP.objects.create(
         user_id=user.id,
         otp_type=OtpType.EMPLOYEE_LOGIN,
@@ -125,12 +132,7 @@ def send_link_to_mobile(request, mobile, link):
     api_response = {
         "code": 200,
         "status": "success",
-        "data": [
-            {
-                "mobile": f"91{mobile}",
-                "uniqueid": "dummy_unique_id_123456"
-            }
-        ]
+        "data": [{"mobile": f"91{mobile}", "uniqueid": "dummy_unique_id_123456"}],
     }
 
     sms_status = DeliveryStatus.DELIVERED  # Always mark as delivered for dev
@@ -144,4 +146,4 @@ def send_link_to_mobile(request, mobile, link):
         sent_at=timezone.now(),
     )
 
-    return api_response  
+    return api_response

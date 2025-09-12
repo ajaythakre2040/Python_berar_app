@@ -97,7 +97,6 @@ class LoginView(APIView):
         login_portal = data.get("portal_id", 1)
 
         ip_address, agent_browser = get_client_ip_and_agent(request)
-        
 
         if not all([username, password]):
             return Response(
@@ -181,7 +180,7 @@ class LoginView(APIView):
                 "user": user.id,
                 "accessToken": False,
                 "request_id": request_id,
-                'two_step': True,
+                "two_step": True,
                 "otp_expire": expiry,
             },
             status=status.HTTP_200_OK,
@@ -193,8 +192,6 @@ class LoginView(APIView):
         elif "@" in username:
             return TblUser.objects.filter(email=username).first()
         return None
-    
-    
 
     def _log_failed_attempt(self, user, username, ip, agent_browser):
         user.login_attempt += 1
@@ -221,7 +218,7 @@ class TwoFactorVerifyView(APIView):
         user_id = request.data.get("user_id")
         otp_code = request.data.get("otp_code")
         login_portal = request.data.get("portal_id", 1)
-        
+
         ip_address, agent_browser = get_client_ip_and_agent(request)
         request_id = request.data.get("request_id")
 
@@ -451,7 +448,15 @@ class LeadLoginView(APIView):
 
         mobile_number = data.get("mobile_number")
         portal_id = data.get("portal_id")
-
+        app_signature = data.get("app_signature")
+        if not app_signature:
+            return Response(
+                {
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "App signature is required.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not mobile_number or not re.match(r"^\+?[0-9]{10,15}$", mobile_number):
             return Response(
                 {
@@ -490,7 +495,7 @@ class LeadLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        otp_code, expiry, request_id = send_login_otp(user)
+        otp_code, expiry, request_id = send_login_otp(user, app_signature)
 
         return Response(
             {
@@ -500,7 +505,7 @@ class LeadLoginView(APIView):
                 "user": user.id,
                 "portal_id": portal_id,
                 "request_id": request_id,
-                "otp_code": otp_code,
+                # "otp_code": otp_code,
                 "otp_expire": expiry,
             },
             status=status.HTTP_200_OK,

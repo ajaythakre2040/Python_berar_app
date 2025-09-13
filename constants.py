@@ -212,8 +212,8 @@ OCCUPATION_CHOICES = ((SALARIED, "salaried"), (SELF_EMPLOYED, "Self-Employed"))
 class PercentageStatus(models.IntegerChoices):
     ENQUIRY_BASIC = 1, "Basic"
     ENQUIRY_ADDRESS = 2, "Address"
-    ENQUIRY_LOAN_DETAILS = 3, "Loan_Detail"
-    ENQUIRY_VERIFICATION = 4, "Verification"
+    ENQUIRY_VERIFICATION = 3, "Verification"
+    ENQUIRY_LOAN_DETAILS = 4, "Loan_Detail"
     ENQUIRY_IMAGE = 5, "Image"
     ENQUIRY_SELFIE = 6, "Selfie"
 

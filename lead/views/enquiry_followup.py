@@ -318,19 +318,33 @@ class AllCountAPIView(APIView):
         return Response({
             "success": True,
             "message": "Enquiry counts retrieved successfully.",
-            "total_enquiries_count": Enquiry.objects.filter(deleted_at__isnull=True).count(),
+
+
+            "total_enquiries_count": Enquiry.objects.filter(
+                deleted_at__isnull=True,
+                is_status__in=[
+                    EnquiryStatus.ACTIVE,
+                    EnquiryStatus.CLOSED,
+                    EnquiryStatus.REJECT,
+                    EnquiryStatus.RE_OPEN,
+                ]
+            ).count(),
+
             "total_followup_count": EnquiryLoanDetails.objects.filter(
                 followup_pickup_date__gte=today,
                 enquiry__deleted_at__isnull=True
             ).values("enquiry_id").distinct().count(),
+
             "total_active_count": Enquiry.objects.filter(
                 is_status=EnquiryStatus.ACTIVE,
                 deleted_at__isnull=True
             ).count(),
+            
             "total_closed_count": Enquiry.objects.filter(
                 is_status=EnquiryStatus.CLOSED,
                 deleted_at__isnull=True
             ).count(),
+
             "total_draft_count": total_draft_count,
             "today_draft_count": today_draft_count,
             "today_followup_count": today_followups,
@@ -367,6 +381,7 @@ class TodayEnquiryListAPIView(APIView):
         today = date.today()
         enquiries = Enquiry.objects.filter(
             created_at__date=today,
+            is_status=EnquiryStatus.ACTIVE,
             deleted_at__isnull=True
         ).order_by("-created_at")
 

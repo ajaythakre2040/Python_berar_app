@@ -55,7 +55,7 @@ urlpatterns = [
 
     #Lead Enquiries
     path("enquiries/", EnquiryListCreateAPIView.as_view(), name="enquiry-list-create"),
-    path("enquiries/draft", EnquiryDraftAPIView.as_view(), name="enquiry-draft"),
+    path("enquiries/draft/", EnquiryDraftAPIView.as_view(), name="enquiry-draft"),
     path("enquiries/today-draft/", EnquiryTodayDraftAPIView.as_view(), name="enquiry-today-draft"),
     path("enquiries/<int:pk>/", EnquiryDetailView.as_view(), name="enquiry-detail"),
 

@@ -12,6 +12,10 @@ class EnquiryAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = EnquiryAddress
         exclude = ("created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at")
+        
+
+
+
 
 class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     loan_type_display = serializers.SerializerMethodField()
@@ -88,8 +92,8 @@ class EnquirySerializer(serializers.ModelSerializer):
 
 
     enquiry_addresses = EnquiryAddressSerializer(many=True, read_only=True)
-    enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
     enquiry_verification = EnquiryVerificationSerializer(read_only=True)
+    enquiry_loan_details = EnquiryLoanDetailsSerializer(many=True, read_only=True)
     enquiry_images = EnquiryImagesSerializer(many=True, read_only=True)
     enquiry_selfies = EnquirySelfieSerializer(many=True, read_only=True)
 
@@ -115,8 +119,13 @@ class EnquirySerializer(serializers.ModelSerializer):
             "business_name", "business_place", "business_contact_number",
             "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
             "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
-            "enquiry_addresses", "enquiry_loan_details",
-            "enquiry_verification", "enquiry_images", "enquiry_selfies","created_by", "created_by_name", "created_by_code","created_at"
+            "enquiry_addresses",  
+            "enquiry_verification", 
+            "enquiry_loan_details",
+            "enquiry_images",
+            "enquiry_selfies",
+            
+            "created_by", "created_by_name", "created_by_code","created_at"
         ]
 
     # def get_loan_type_display(self, obj):

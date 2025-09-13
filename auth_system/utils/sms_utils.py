@@ -34,7 +34,33 @@ def send_seized_emp_otp(mobile_number, otp):
     except Exception as e:
         return {"error": "Invalid response", "content": response.text}
 
-
+def send_seized_leadApp_otp(mobile_number, otp, app_signature):
+    url = "http://api.pinnacle.in/index.php/sms/json"
+    headers = {
+        "apikey": API_SMS_KEY,
+        "Content-Type": "application/json",
+        "Cookie": 'DO-LB="MTAuMTM5LjIyMy4xMTA6ODA="; PHPSESSID=1fo6rqls3mecq8ge6e7q6k2mmf',
+    }
+    message_text = (
+        f"Dear User, use this One Time Password (OTP) {otp} to verify your mobile number. "
+        f"It is valid for the next 3 minutes.Thank you,Berar Finance Limited.{app_signature}"
+    )
+    payload = {
+        "sender": "berarf",
+        "message": [
+            {
+                "number": f"91{mobile_number}",
+                "text": message_text,
+            }
+        ],
+        "messagetype": "TXT",
+        "dlttempid": "1707175759464141558",
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    try:
+        return response.json()
+    except Exception:
+        return {"error": "Invalid response", "content": response.text}
 
 def send_enquiry_otp_to_mobile(mobile_number, otp):
     url = "http://api.pinnacle.in/index.php/sms/json"

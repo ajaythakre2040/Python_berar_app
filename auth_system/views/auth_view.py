@@ -44,7 +44,7 @@ from constants import (
     LEAD,
 )
 import re
-from auth_system.utils.otp_utils import send_login_otp
+from auth_system.utils.otp_utils import send_login_otp,send_Applogin_otp
 from auth_system.utils.common import get_client_ip_and_agent
 
 
@@ -490,7 +490,7 @@ class LeadLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        otp_code, expiry, request_id = send_login_otp(user)
+        otp_code, expiry, request_id = send_Applogin_otp(user, app_signature)
 
         return Response(
             {

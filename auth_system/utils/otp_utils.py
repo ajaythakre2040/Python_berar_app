@@ -183,12 +183,7 @@ def send_link_to_mobile(request, mobile, link):
     api_response = {
         "code": 200,
         "status": "success",
-        "data": [
-            {
-                "mobile": f"91{mobile}",
-                "uniqueid": "dummy_unique_id_123456"
-            }
-        ]
+        "data": [{"mobile": f"91{mobile}", "uniqueid": "dummy_unique_id_123456"}],
     }
 
     sms_status = DeliveryStatus.DELIVERED  # Always mark as delivered for dev
@@ -202,4 +197,4 @@ def send_link_to_mobile(request, mobile, link):
         sent_at=timezone.now(),
     )
 
-    return api_response  
+    return api_response

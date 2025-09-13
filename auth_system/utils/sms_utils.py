@@ -117,7 +117,6 @@ def send_enquiry_otp_to_email(email, otp):
         return {"success": False, "error": "Failed to send email", "details": str(e)}
 
 
-
 def send_link(mobile_number, link):
     url = "http://api.pinnacle.in/index.php/sms/json"
     headers = {
@@ -130,11 +129,11 @@ def send_link(mobile_number, link):
         "message": [
             {
                 "number": f"91{mobile_number}",
-                "text": f"Dear User, This is your link {link}. Thank You Berar Finance Limited"
+                "text": f"Dear User, This is your link {link}. Thank You Berar Finance Limited",
             }
         ],
         "messagetype": "TXT",
-        "dlttempid": "1707170659123947276"
+        "dlttempid": "1707170659123947276",
     }
     response = requests.post(url, json=payload, headers=headers)
     try:

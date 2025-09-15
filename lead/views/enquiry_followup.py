@@ -295,7 +295,9 @@ class AllCountAPIView(APIView):
 
         today_created = Enquiry.objects.filter(
             created_at__date=today,
-            deleted_at__isnull=True
+            deleted_at__isnull=True,
+            is_status=EnquiryStatus.ACTIVE,
+
         ).count()
 
         this_month_created = Enquiry.objects.filter(

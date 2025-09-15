@@ -390,8 +390,10 @@ class TodayEnquiryListAPIView(APIView):
 
         serializer = EnquirySerializer(paginated_enquiries, many=True)
 
-        return paginator.get_paginated_response({
-            "success": True,
-            "message": "Todays enquiries retrieved successfully.",
-            "data": serializer.data
-        })
+        return paginator.get_custom_paginated_response(
+                serializer.data,
+                extra_fields={
+                    "success": True,
+                    "message": "Todays enquiries retrieved successfully.",
+                }
+            )

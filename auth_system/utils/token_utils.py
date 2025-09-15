@@ -18,6 +18,10 @@ def generate_token(user, portal_id) -> dict:
     access["full_name"] = getattr(user, "full_name", "")
     access["role_id"] = user.role_id.id if user.role_id else 0
     access["portal_id"] = portal_id
+    employee_code = getattr(user, "employee_code", "")
+    access["employee_code"] = employee_code
+
+
 
     return {
         "access": str(access),

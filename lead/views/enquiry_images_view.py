@@ -14,22 +14,38 @@ from lead.models.lead_logs import LeadLog
 from lead.models.enquiry_images import EnquiryImages
 from django.http import FileResponse, Http404
 
+
 class EnquiryImagesCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
     def post(self, request, enquiry_id):
         enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
 
-        serializer = EnquiryImageSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                serializer.save(enquiry=enquiry, created_by=request.user.id)
+        try:
+            image_instance = EnquiryImages.objects.filter(
+                enquiry=enquiry, deleted_at__isnull=True
+            ).first()
+
+            if image_instance:
+                serializer = EnquiryImageSerializer(
+                    image_instance, data=request.data, partial=True
+                )
+            else:
+                serializer = EnquiryImageSerializer(data=request.data)
+
+            if serializer.is_valid():
+                saved_instance = serializer.save(
+                    enquiry=enquiry,
+                    created_by=request.user.id if not image_instance else image_instance.created_by,
+                    updated_by=request.user.id,
+                    updated_at=timezone.now(),
+                )
 
                 if enquiry.is_steps < PercentageStatus.ENQUIRY_IMAGE:
                     enquiry.is_steps = PercentageStatus.ENQUIRY_IMAGE
                     enquiry.updated_by = request.user.id
                     enquiry.updated_at = timezone.now()
-                    enquiry.save()
+                    enquiry.save(update_fields=["is_steps", "updated_by", "updated_at"])
 
                 LeadLog.objects.create(
                     enquiry=enquiry,
@@ -37,36 +53,38 @@ class EnquiryImagesCreateAPIView(APIView):
                     created_by=request.user.id,
                 )
 
-                imageData = EnquiryImages.objects.filter(enquiry=enquiry_id, deleted_at__isnull=True)
+                image_qs = EnquiryImages.objects.filter(
+                    enquiry=enquiry, deleted_at__isnull=True
+                )
+                serialized_images = EnquiryImageSerializer(image_qs, many=True)
 
-                if not imageData.exists():
-                    return Response({
-                        "success": False,
-                        "message": "Failed to save enquiry image.",
-                        "data": []
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "success": True,
+                        "message": "Enquiry image saved successfully.",
+                        "data": serialized_images.data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
 
-                serialized_images = EnquiryImageSerializer(imageData, many=True)
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid data submitted for enquiry image.",
+                    "errors": serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-                return Response({
-                    "success": True,
-                    "message": "Enquiry image saved successfully.",
-                    "data": serialized_images.data, 
-                }, status=status.HTTP_201_CREATED)
-            
-
-            except IntegrityError as e:
-                return Response({
+        except IntegrityError as e:
+            return Response(
+                {
                     "success": False,
                     "message": "Database integrity error while saving image.",
-                    "error": str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
-        return Response({
-            "success": False,
-            "message": "Invalid data submitted for enquiry image.",
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-
+                    "error": str(e),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class EnquiryImagesDeleteAPIView(APIView):

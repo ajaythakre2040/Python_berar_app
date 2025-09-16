@@ -10,6 +10,7 @@ from auth_system.permissions.token_valid import IsTokenValid
 from constants import PercentageStatus
 from django.utils import timezone
 from lead.models.lead_logs import LeadLog  
+from lead.models.enquiry_loan_details import EnquiryLoanDetails
 
 
 class EnquiryLoanDetailsCreateAPIView(APIView):
@@ -17,6 +18,31 @@ class EnquiryLoanDetailsCreateAPIView(APIView):
 
     def post(self, request, enquiry_id):
         enquiry = get_object_or_404(Enquiry, pk=enquiry_id)
+
+        enquiry_loan = EnquiryLoanDetails.objects.filter(enquiry=enquiry).first()
+
+        if enquiry_loan:
+            serializer = EnquiryLoanDetailsSerializer(enquiry_loan, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(updated_by=request.user.id, updated_at=timezone.now())
+
+                LeadLog.objects.create(
+                    enquiry=enquiry,
+                    status="Enquiry Loan Details Updated",
+                    created_by=request.user.id,
+                )
+
+                return Response({
+                    "success": True,
+                    "message": "Enquiry loan details updated successfully.",
+                    "data": serializer.data
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                "success": False,
+                "message": "Invalid data submitted for loan details update.",
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = EnquiryLoanDetailsSerializer(data=request.data)
         if serializer.is_valid():
@@ -34,12 +60,12 @@ class EnquiryLoanDetailsCreateAPIView(APIView):
                         status="Enquiry Loan Details Form",
                         created_by=request.user.id,
                     )
-                # re-serialize for response (includes 'enquiry', 'loan_type_display', etc.)
+
                 response_serializer = EnquiryLoanDetailsSerializer(saved_instance)
 
                 return Response({
                     "success": True,
-                    "message": "Enquiry loan details saved successfully.",
+                    "message": "Enquiry loan details created successfully.",
                     "data": response_serializer.data
                 }, status=status.HTTP_201_CREATED)
 
@@ -52,6 +78,6 @@ class EnquiryLoanDetailsCreateAPIView(APIView):
 
         return Response({
             "success": False,
-            "message": "Invalid data submitted for loan details.",
+            "message": "Invalid data submitted for loan details creation.",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)

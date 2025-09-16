@@ -68,7 +68,6 @@ urlpatterns = [
     path("enquiries/<int:enquiry_id>/images/<int:image_id>/", EnquiryImagesDeleteAPIView.as_view(), name="enquiry-images-delete"),
 
     path("enquiries/<int:enquiry_id>/images/<int:image_id>", EnquiryImagesGetAPIView.as_view(), name="enquiry-images-get"),
-    # path("enquiries/<int:enquiry_id>/images/<int:image_id>/file/", EnquiryImagesGetAPIView.as_view(), name="enquiry-image-file"),
     path("enquiries/<int:enquiry_id>/images", EnquiryImagesListAPIView.as_view(), name="enquiry-images-get-all"),
 
     #Lead Selfie

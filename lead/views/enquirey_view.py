@@ -15,6 +15,7 @@ from lead.models.lead_logs import LeadLog
 from api_endpoints import CUSTOMER_GET_BY_ACCOUNT_URL
 from lead.utils.mis_helpers import call_mis_api
 from datetime import date
+from django.utils import timezone
 
 class EnquiryListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -56,10 +57,52 @@ class EnquiryListCreateAPIView(APIView):
             }
         )
 
+
+        
     def post(self, request):
+        enquiry_id = request.data.get("enquiry_id")
+
+        e = Enquiry.objects.last()
+        print(e.updated_at)                     
+        print(timezone.localtime(e.updated_at)) 
+
+        if enquiry_id:
+            try:
+                enquiry = Enquiry.objects.get(id=enquiry_id)
+            except Enquiry.DoesNotExist:
+                enquiry = None
+
+            if enquiry:
+                serializer = EnquirySerializer(enquiry, data=request.data, partial=True)
+                if serializer.is_valid():
+                    enquiry = serializer.save(updated_by=request.user.id, updated_at=timezone.localtime())  # assuming you track updated_by
+                    LeadLog.objects.create(
+                        enquiry=enquiry,
+                        status="Enquiry Updated",
+                        created_by=request.user.id,
+                    )
+                    return Response(
+                        {
+                            "Success": True,
+                            "Message": "Enquiry updated successfully.",
+                            "data": EnquirySerializer(enquiry).data,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                else:
+                    return Response(
+                        {
+                            "Success": False,
+                            "Message": "Invalid data provided for update.",
+                            "Errors": serializer.errors,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            
+
+        # Create new enquiry
         serializer = EnquirySerializer(data=request.data)
         if serializer.is_valid():
-
             try:
                 enquiry = serializer.save(
                     created_by=request.user.id,
@@ -72,12 +115,12 @@ class EnquiryListCreateAPIView(APIView):
                     created_by=request.user.id,
                 )
                 return Response(
-                {
-                    "Success": True,
-                    "Message": "Enquiry created successfully.",
-                    "data": EnquirySerializer(enquiry).data,
-                },
-                status=status.HTTP_201_CREATED,
+                    {
+                        "Success": True,
+                        "Message": "Enquiry created successfully.",
+                        "data": EnquirySerializer(enquiry).data,
+                    },
+                    status=status.HTTP_201_CREATED,
                 )
             except IntegrityError as e:
                 return Response(
@@ -92,12 +135,11 @@ class EnquiryListCreateAPIView(APIView):
             return Response(
                 {
                     "Success": False,
-                    "Message": "Invalid data provided.",
+                    "Message": "Invalid data provided for creation.",
                     "Errors": serializer.errors,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
-            )   
-        
+            )
 
 class EnquiryDetailView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]

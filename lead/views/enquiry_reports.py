@@ -1,5 +1,3 @@
-
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -14,11 +12,15 @@ from auth_system.utils.pagination import CustomPagination
 from django.http import HttpResponse
 from auth_system.models.user import TblUser  
 from ems.models.branch import TblBranch
+from datetime import date
+today = date.today()
 
 # from ems.models.emp_basic_profile import TblEmpBasicProfile
 from django.shortcuts import get_object_or_404
 
 import pandas as pd
+
+
 
 class EnquiryReportAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -35,22 +37,35 @@ class EnquiryReportAPIView(APIView):
         filters = Q()
 
         if from_date and not to_date:
-            return Response({
-                "success": False,
-                "message": "Please select 'to_date' when using 'from_date'."
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "success": False,
+                    "message": "Please select 'to_date' when using 'from_date'.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if to_date:
             to_date = parse_date(to_date)
             if not to_date:
-                return Response({"success": False, "message": "Invalid 'to_date' format. Use YYYY-MM-DD."},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Invalid 'to_date' format. Use YYYY-MM-DD.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             if from_date:
                 from_date = parse_date(from_date)
                 if not from_date:
-                    return Response({"success": False, "message": "Invalid 'from_date' format. Use YYYY-MM-DD."},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Invalid 'from_date' format. Use YYYY-MM-DD.",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
                 filters &= Q(created_at__date__range=[from_date, to_date])
             else:
                 filters &= Q(created_at__date=to_date)
@@ -62,29 +77,34 @@ class EnquiryReportAPIView(APIView):
             filters &= Q(assign_to=assign_to)
 
         if status_val is not None:
-            filters &= Q(is_status=status_val)
+            if status_val == 5:
+                filters &= Q(is_status=0, created_at__date=date.today())
+            else:
+                filters &= Q(is_status=status_val)
 
         enquiries = Enquiry.objects.filter(filters).order_by("id")
 
-        # paginator = CustomPagination()
-        # page_data = paginator.paginate_queryset(enquiries, request)
-        # serializer = EnquirySerializer(page_data, many=True)
-        serializer = EnquirySerializer(enquiries, many=True)
+        paginator = CustomPagination()
+        page_data = paginator.paginate_queryset(enquiries, request)
+        serializer = EnquirySerializer(page_data, many=True)
+        # serializer = EnquirySerializer(enquiries, many=True)
 
-        # return paginator.get_custom_paginated_response(
-        #     data=serializer.data,
-        #     extra_fields={
+        return paginator.get_custom_paginated_response(
+            data=serializer.data,
+            extra_fields={
+                "success": True,
+                "message": "Enquiries report retrieved successfully (paginated).",
+            }
+        )
+
+        # return Response(
+        #     {
         #         "success": True,
-        #         "message": "Enquiries report retrieved successfully (paginated).",
-        #     }
+        #         "message": "Enquiries report retrieved successfully.",
+        #         "data": serializer.data,
+        #     },
+        #     status=status.HTTP_200_OK,
         # )
-
-        return Response({
-            "success": True,
-            "message": "Enquiries report retrieved successfully.",
-            "data": serializer.data
-        }, status=status.HTTP_200_OK)
-
 
 
 class EnquiryReportDownloadAPIView(APIView):
@@ -117,9 +137,13 @@ class EnquiryReportDownloadAPIView(APIView):
             filters &= Q(created_by=employee_id)
         if assign_to:
             filters &= Q(assign_to=assign_to)
+        # if status_val is not None:
+        #     filters &= Q(is_status=status_val)
         if status_val is not None:
-            filters &= Q(is_status=status_val)
-
+            if status_val == 5:
+                filters &= Q(is_status=0, created_at__date=date.today())
+            else:
+                filters &= Q(is_status=status_val)
         enquiries = Enquiry.objects.filter(filters).order_by("id")
         serializer = EnquirySerializer(enquiries, many=True)
 

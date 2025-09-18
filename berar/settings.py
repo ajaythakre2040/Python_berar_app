@@ -17,7 +17,7 @@ from corsheaders.defaults import default_headers
 from decouple import config
 
 FERNET_KEY =b'VaEN1_M4XqzKH3VUEHYR-RZ0xKxVYjUv2Yd7y3GGB0o='
-  # Example: Fernet.generate_key()
+# Example: Fernet.generate_key()
 
 # from decouple import config
 
@@ -111,7 +111,7 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "5432",
     },
-}
+ }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

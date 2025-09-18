@@ -19,6 +19,56 @@ from lead.models.enquiry_lead_assign_log import LeadAssignLog
 from ems.models.emp_basic_profile import TblEmpBasicProfile
 from django.db import transaction
 
+# class EnquiryFollowUpCountAPIView(APIView):
+#     permission_classes = [IsAuthenticated, IsTokenValid]
+
+#     def get(self, request):
+#         today = date.today()
+#         count_only = request.query_params.get("count_only") == "true"
+
+#         loan_qs = EnquiryLoanDetails.objects.filter(
+#             followup_pickup_date=today,
+#             enquiry__deleted_at__isnull=True
+#         )
+
+#         enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
+#         enquiries = Enquiry.objects.filter(id__in=enquiry_ids)
+
+#         for loan_detail in loan_qs:
+#             LeadLog.objects.get_or_create(
+#                 enquiry_id=loan_detail.enquiry_id,
+#                 status="Follow-up Scheduled",
+#                 defaults={
+#                     "created_by": 0,
+#                     "remark": f"Follow-up scheduled for {loan_detail.followup_pickup_date}",
+#                 },
+#             )
+
+#         total_count = enquiries.count()
+
+#         if count_only:
+#             return Response(
+#                 {
+#                     "status": "success",
+#                     "count": total_count,
+#                 },
+#                 status=status.HTTP_200_OK,
+#             )
+
+#         paginator = CustomPagination()
+#         paginated_enquiries = paginator.paginate_queryset(enquiries, request)
+
+#         serializer = EnquirySerializer(paginated_enquiries, many=True)
+
+#         return paginator.get_paginated_response(
+#             {
+#                 "success": True,
+#                 "message": "Enquiries with follow-up scheduled for today retrieved successfully.",
+#                 "data": serializer.data,
+#             }
+#         )
+
+
 class EnquiryFollowUpCountAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -27,12 +77,11 @@ class EnquiryFollowUpCountAPIView(APIView):
         count_only = request.query_params.get("count_only") == "true"
 
         loan_qs = EnquiryLoanDetails.objects.filter(
-            followup_pickup_date=today,
-            enquiry__deleted_at__isnull=True
+            followup_pickup_date=today, enquiry__deleted_at__isnull=True
         )
 
         enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
-        enquiries = Enquiry.objects.filter(id__in=enquiry_ids)
+        enquiries = Enquiry.objects.filter(id__in=enquiry_ids).order_by("-created_at")
 
         for loan_detail in loan_qs:
             LeadLog.objects.get_or_create(
@@ -67,6 +116,7 @@ class EnquiryFollowUpCountAPIView(APIView):
                 "data": serializer.data,
             }
         )
+
 
 class FollowUpUpdateAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -181,7 +231,7 @@ class ClosedEnquiriesAPIView(APIView):
             "message": "Closed enquiries retrieved successfully.",
             "data": serializer.data
         })
-    
+
 class ReopenEnquiryView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 
@@ -226,7 +276,7 @@ class ReopenEnquiryView(APIView):
             {"success": False, "message": "Invalid input or 'reopen' not true."},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
 class LeadAssignView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 

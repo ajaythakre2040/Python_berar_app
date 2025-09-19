@@ -13,14 +13,98 @@ from django.http import HttpResponse
 from auth_system.models.user import TblUser  
 from ems.models.branch import TblBranch
 from datetime import date
-today = date.today()
-
+from datetime import timedelta
+from lead.models.enquiry_loan_details import EnquiryLoanDetails
 # from ems.models.emp_basic_profile import TblEmpBasicProfile
 from django.shortcuts import get_object_or_404
 
 import pandas as pd
 
 
+
+# class EnquiryReportAPIView(APIView):
+#     permission_classes = [IsAuthenticated, IsTokenValid]
+
+#     def post(self, request):
+#         data = request.data
+
+#         to_date = data.get("to_date")
+#         from_date = data.get("from_date")
+#         employee_id = data.get("employee_id")
+#         assign_to = data.get("assign_to")
+#         status_val = data.get("status")
+
+#         filters = Q()
+
+#         if from_date and not to_date:
+#             return Response(
+#                 {
+#                     "success": False,
+#                     "message": "Please select 'to_date' when using 'from_date'.",
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         if to_date:
+#             to_date = parse_date(to_date)
+#             if not to_date:
+#                 return Response(
+#                     {
+#                         "success": False,
+#                         "message": "Invalid 'to_date' format. Use YYYY-MM-DD.",
+#                     },
+#                     status=status.HTTP_400_BAD_REQUEST,
+#                 )
+
+#             if from_date:
+#                 from_date = parse_date(from_date)
+#                 if not from_date:
+#                     return Response(
+#                         {
+#                             "success": False,
+#                             "message": "Invalid 'from_date' format. Use YYYY-MM-DD.",
+#                         },
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+#                 filters &= Q(created_at__date__range=[from_date, to_date])
+#             else:
+#                 filters &= Q(created_at__date=to_date)
+
+#         if employee_id:
+#             filters &= Q(created_by=employee_id)
+
+#         if assign_to:
+#             filters &= Q(assign_to=assign_to)
+
+#         if status_val is not None:
+#             if status_val == 5:
+#                 filters &= Q(is_status=0, created_at__date=date.today())
+#             else:
+#                 filters &= Q(is_status=status_val)
+
+#         enquiries = Enquiry.objects.filter(filters).order_by("id")
+
+#         paginator = CustomPagination()
+#         page_data = paginator.paginate_queryset(enquiries, request)
+#         serializer = EnquirySerializer(page_data, many=True)
+#         # serializer = EnquirySerializer(enquiries, many=True)
+
+#         return paginator.get_custom_paginated_response(
+#             data=serializer.data,
+#             extra_fields={
+#                 "success": True,
+#                 "message": "Enquiries report retrieved successfully (paginated).",
+#             }
+#         )
+
+#         # return Response(
+#         #     {
+#         #         "success": True,
+#         #         "message": "Enquiries report retrieved successfully.",
+#         #         "data": serializer.data,
+#         #     },
+#         #     status=status.HTTP_200_OK,
+#         # )
 
 class EnquiryReportAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -32,62 +116,65 @@ class EnquiryReportAPIView(APIView):
         from_date = data.get("from_date")
         employee_id = data.get("employee_id")
         assign_to = data.get("assign_to")
-        status_val = data.get("status")
+        status_val = data.get("status")  # use this for follow-up logic
 
         filters = Q()
 
+        # Date filters
         if from_date and not to_date:
             return Response(
-                {
-                    "success": False,
-                    "message": "Please select 'to_date' when using 'from_date'.",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+                {"success": False, "message": "Please select 'to_date' when using 'from_date'."},
+                status=400,
             )
 
         if to_date:
             to_date = parse_date(to_date)
             if not to_date:
                 return Response(
-                    {
-                        "success": False,
-                        "message": "Invalid 'to_date' format. Use YYYY-MM-DD.",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"success": False, "message": "Invalid 'to_date' format. Use YYYY-MM-DD."},
+                    status=400,
                 )
 
             if from_date:
                 from_date = parse_date(from_date)
                 if not from_date:
                     return Response(
-                        {
-                            "success": False,
-                            "message": "Invalid 'from_date' format. Use YYYY-MM-DD.",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
+                        {"success": False, "message": "Invalid 'from_date' format. Use YYYY-MM-DD."},
+                        status=400,
                     )
                 filters &= Q(created_at__date__range=[from_date, to_date])
             else:
                 filters &= Q(created_at__date=to_date)
 
+        # Other filters
         if employee_id:
             filters &= Q(created_by=employee_id)
-
         if assign_to:
             filters &= Q(assign_to=assign_to)
 
+        # Status filter
         if status_val is not None:
-            if status_val == 5:
+            if int(status_val) == 5:
+                # Status 5 = pending today
                 filters &= Q(is_status=0, created_at__date=date.today())
+            elif int(status_val) == 4:
+                # Status 4 = follow-up scheduled today
+                today = date.today()
+                loan_qs = EnquiryLoanDetails.objects.filter(
+                    followup_pickup_date=today
+                )
+                enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
+                filters &= Q(id__in=enquiry_ids)
             else:
                 filters &= Q(is_status=status_val)
 
+        # Fetch enquiries
         enquiries = Enquiry.objects.filter(filters).order_by("id")
 
+        # Pagination
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(enquiries, request)
         serializer = EnquirySerializer(page_data, many=True)
-        # serializer = EnquirySerializer(enquiries, many=True)
 
         return paginator.get_custom_paginated_response(
             data=serializer.data,
@@ -96,16 +183,7 @@ class EnquiryReportAPIView(APIView):
                 "message": "Enquiries report retrieved successfully (paginated).",
             }
         )
-
-        # return Response(
-        #     {
-        #         "success": True,
-        #         "message": "Enquiries report retrieved successfully.",
-        #         "data": serializer.data,
-        #     },
-        #     status=status.HTTP_200_OK,
-        # )
-
+    
 
 class EnquiryReportDownloadAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -142,6 +220,14 @@ class EnquiryReportDownloadAPIView(APIView):
         if status_val is not None:
             if status_val == 5:
                 filters &= Q(is_status=0, created_at__date=date.today())
+
+            elif status_val == 4:
+                # Follow-up scheduled today
+                today = date.today()
+                loan_qs = EnquiryLoanDetails.objects.filter(followup_pickup_date=today)
+                enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
+                filters &= Q(id__in=enquiry_ids)
+
             else:
                 filters &= Q(is_status=status_val)
         enquiries = Enquiry.objects.filter(filters).order_by("id")

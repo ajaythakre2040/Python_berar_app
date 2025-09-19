@@ -15,8 +15,6 @@ class EnquiryAddressSerializer(serializers.ModelSerializer):
         
 
 
-
-
 class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     loan_type_display = serializers.SerializerMethodField()
     loan_amount_range_display = serializers.SerializerMethodField()
@@ -84,6 +82,7 @@ class EnquirySerializer(serializers.ModelSerializer):
     is_status_display = serializers.SerializerMethodField()
     is_steps_display = serializers.SerializerMethodField()
     nature_of_business_display = serializers.SerializerMethodField()
+    kyc_document_display = serializers.SerializerMethodField()
 
     created_by = serializers.IntegerField(read_only=True)
     created_by_name = serializers.SerializerMethodField()
@@ -118,7 +117,7 @@ class EnquirySerializer(serializers.ModelSerializer):
             "official_contact_number", "nature_of_service", "monthly_income",
             "business_name", "business_place", "business_contact_number",
             "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
-            "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
+            "kyc_document","kyc_document_display", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
             "enquiry_addresses",  
             "enquiry_verification", 
             "enquiry_loan_details",
@@ -142,6 +141,9 @@ class EnquirySerializer(serializers.ModelSerializer):
     
     def get_nature_of_business_display(self, obj):
         return obj.nature_of_business.name if obj.nature_of_business else None
+    
+    def get_kyc_document_display(self, obj):
+        return obj.get_kyc_document_display() if obj.kyc_document else None
     
     def get_created_by_name(self, obj):
         if obj.created_by:

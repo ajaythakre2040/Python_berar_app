@@ -5,6 +5,8 @@ from django.utils import timezone
 from constants import OCCUPATION_CHOICES
 from constants import PercentageStatus
 from constants import EnquiryStatus
+from constants import  KycStatus
+
 from ems.models.emp_basic_profile import TblEmpBasicProfile
 from lead.models.nature_of_business import NatureOfBusiness
 class Enquiry(models.Model):
@@ -34,7 +36,7 @@ class Enquiry(models.Model):
 
     interested = models.BooleanField(default=False)
     kyc_collected = models.BooleanField(default=False)
-    kyc_document = models.CharField(max_length=255, null=True, blank=True)
+    kyc_document = models.IntegerField(choices=KycStatus.choices, null=True, blank=True)
     kyc_number = models.CharField(max_length=50, null=True, blank=True)
     is_steps = models.IntegerField(choices=PercentageStatus.choices, default=PercentageStatus.ENQUIRY_BASIC)    
     is_status = models.IntegerField(choices=EnquiryStatus.choices,default=EnquiryStatus.DRAFT)

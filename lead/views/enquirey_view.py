@@ -63,8 +63,8 @@ class EnquiryListCreateAPIView(APIView):
         enquiry_id = request.data.get("enquiry_id")
 
         e = Enquiry.objects.last()
-        print(e.updated_at)                     
-        print(timezone.localtime(e.updated_at)) 
+        # print(e.updated_at)                     
+        # print(timezone.localtime(e.updated_at)) 
 
         if enquiry_id:
             try:

@@ -58,7 +58,7 @@ class EnquiryVerificationCreateAPIView(APIView):
             verification.mobile_status = MOBILE_PENDING
         elif channel == "email":
             verification.email = value
-            verification.email_verified = EMAIL_PENDING
+            verification.email_status = EMAIL_PENDING
 
         verification.updated_by = request.user.id
         verification.updated_at = timezone.now()
@@ -130,17 +130,14 @@ class otpVerificationAPIView(APIView):
 
         if channel == "mobile":
             verification.mobile = value
-
-            print('verification value', value)
-
             verification.mobile_status = MOBILE_VERIFIED
-
-            print('verification MOBILE_VERIFIED', MOBILE_VERIFIED)
 
 
         elif channel == "email":
             verification.email = value
-            verification.email_verified = EMAIL_VERIFIED
+            verification.email_status = EMAIL_VERIFIED
+
+
         else:
             return Response({"message": "Invalid channel."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,7 +145,6 @@ class otpVerificationAPIView(APIView):
         verification.updated_at = timezone.now()
         verification.save()
 
-        print('verification Done')
 
         LeadLog.objects.create(
             enquiry=enquiry,
@@ -188,15 +184,22 @@ class EnquiryVerificationCompleteAPIView(APIView):
 
         if mobile:
             verification.mobile = mobile
+
             verification.mobile_status = MOBILE_VERIFIED if mobile_verified else MOBILE_SKIPPED
+
         elif not verification.mobile:
+
             verification.mobile_status = MOBILE_SKIPPED
 
         if email:
+
             verification.email = email
-            verification.email_verified = EMAIL_VERIFIED if email_verified else EMAIL_SKIPPED
+
+            verification.email_status = EMAIL_VERIFIED if email_verified else EMAIL_SKIPPED
+
         elif not verification.email:
-            verification.email_verified = EMAIL_SKIPPED
+
+            verification.email_status = EMAIL_SKIPPED
 
         if aadhaar:
             verification.aadhaar = aadhaar
@@ -210,7 +213,7 @@ class EnquiryVerificationCompleteAPIView(APIView):
 
         if (
             verification.mobile_status == MOBILE_VERIFIED
-            or verification.email_verified == EMAIL_VERIFIED
+            or verification.email_status == EMAIL_VERIFIED
             or verification.aadhaar_verified is True
         ):
             if int(enquiry.is_steps) < int(PercentageStatus.ENQUIRY_VERIFICATION):

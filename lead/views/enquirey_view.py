@@ -42,7 +42,7 @@ class EnquiryListCreateAPIView(APIView):
                 "total_counts": total_count
             }, status=status.HTTP_200_OK)
 
-        enquiries = enquiries.order_by("id")
+        enquiries = enquiries.order_by("-id")
 
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(enquiries, request)

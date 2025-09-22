@@ -29,7 +29,7 @@ class EnquiryTicketCreateAPIView(APIView):
         )
     
     def get(self, request):
-        tickets = EnquiryTickets.objects.filter(deleted_at__isnull=True).order_by("id")
+        tickets = EnquiryTickets.objects.filter(deleted_at__isnull=True).order_by("-id")
         total_count = tickets.count()
         count_only = request.query_params.get("count_only") == "true"
         if count_only:

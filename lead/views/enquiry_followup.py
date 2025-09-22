@@ -345,8 +345,11 @@ class AllCountAPIView(APIView):
             ).count(),
             
             "total_closed_count": Enquiry.objects.filter(
-                is_status=EnquiryStatus.CLOSED,
-                deleted_at__isnull=True
+                deleted_at__isnull=True, 
+                is_status__in=[
+                    EnquiryStatus.CLOSED,
+                    EnquiryStatus.REJECT,
+                ]
             ).count(),
 
             "total_draft_count": total_draft_count,

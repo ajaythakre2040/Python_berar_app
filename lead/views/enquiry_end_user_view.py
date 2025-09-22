@@ -21,7 +21,7 @@ class EnquiryEndUserCreateView(APIView):
         """
         search_query = request.query_params.get("search", None)
 
-        queryset = EnquiryEnduser.objects.filter(deleted_at__isnull=True).order_by("id")
+        queryset = EnquiryEnduser.objects.filter(deleted_at__isnull=True).order_by("-id")
         if search_query:
             queryset = queryset.filter(name__icontains=search_query)
 

@@ -21,9 +21,9 @@ class PropertyDocumentListCreateView(APIView):
         if search_query:
             queryset = PropertyDocument.objects.filter(
                 name__icontains=search_query, deleted_at__isnull=True
-            )
+            ).order_by("-id")
         else:
-            queryset = PropertyDocument.objects.filter(deleted_at__isnull=True)
+            queryset = PropertyDocument.objects.filter(deleted_at__isnull=True).order_by("-id")
 
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(queryset, request)

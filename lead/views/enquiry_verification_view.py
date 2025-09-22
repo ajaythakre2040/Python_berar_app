@@ -122,8 +122,6 @@ class otpVerificationAPIView(APIView):
 
         verification = EnquiryVerification.objects.filter(enquiry=enquiry).first()
 
-        print('verification mobile', verification)
-
 
         if not verification:
             return Response({"message": "No verification record found. Please request OTP first."}, status=400)
@@ -176,7 +174,6 @@ class EnquiryVerificationCompleteAPIView(APIView):
         user_id = request.user.id
 
         
-        # ✅ Ensure record always exists
         verification, created = EnquiryVerification.objects.get_or_create(
             enquiry=enquiry,
             defaults={"created_by": user_id, "created_at": timezone.now()},

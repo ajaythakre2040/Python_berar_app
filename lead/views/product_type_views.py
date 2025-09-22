@@ -21,11 +21,11 @@ class ProductTypeListCreateView(APIView):
             products = ProductType.objects.filter(
                 name__icontains=search_query,
                 deleted_at__isnull=True
-            ).order_by("id")
+            ).order_by("-id")
         else:
             products = ProductType.objects.filter(
                 deleted_at__isnull=True
-            ).order_by("id")
+            ).order_by("-id")
 
         paginator = CustomPagination()
         page_size = request.query_params.get('page_size')

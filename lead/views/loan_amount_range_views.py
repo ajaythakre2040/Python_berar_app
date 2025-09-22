@@ -22,11 +22,11 @@ class LoanAmountRangeListCreateView(APIView):
             loan_ranges = LoanAmountRange.objects.filter(
                 deleted_at__isnull=True,
                 minimum_loan__icontains=search_query,  
-            ).order_by("id")
+            ).order_by("-id")
         else:
             loan_ranges = LoanAmountRange.objects.filter(
                 deleted_at__isnull=True
-            ).order_by("id")
+            ).order_by("-id")
 
         paginator = CustomPagination()
         page_size = request.query_params.get("page_size")

@@ -11,8 +11,7 @@ from ems.models.emp_basic_profile import TblEmpBasicProfile
 from lead.models.nature_of_business import NatureOfBusiness
 class Enquiry(models.Model):
 
-
-
+    unique_code = models.CharField(max_length=100, unique=True, null=True, blank=True)
     name = models.CharField(max_length=255)
     mobile_number = models.CharField(max_length=15)
     lan_number = models.CharField(max_length=15, null=True, blank=True)

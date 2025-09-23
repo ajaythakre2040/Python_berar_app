@@ -34,7 +34,7 @@ class LoanAmountRangeListCreateView(APIView):
 
         if page_size or page:
             page_data = paginator.paginate_queryset(loan_ranges, request)
-            serializer = LoanAmountRangeSerializer(page_data, many=True)
+            serializer = LoanAmountRangeSerializer(page_data, many=True).order_by("-id")
             return paginator.get_custom_paginated_response(
                 data=serializer.data,
                 extra_fields={

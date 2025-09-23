@@ -171,7 +171,7 @@ class EnquiryReportDownloadAPIView(APIView):
 
 
             row = {
-                "Enquiry ID": enquiry.get("id"),
+                "Unique Code": enquiry.get("unique_code"),
                 "Survey Date": enquiry.get("created_at"),
                 "Branch Name": branch["branch_name"] if branch else None,
                 "Product": None,  
@@ -190,16 +190,12 @@ class EnquiryReportDownloadAPIView(APIView):
                 "Loan Required On": None,
                 "Enquiry Type": None,
                 "Remark": None,
-
-                  # --- new fields from verification ---
                 "Verification Mobile": verification.get("mobile") or "NA",
                 "Verification Mobile Status": verification.get("mobile_status_display") or "NA",
                 "Verification Email": verification.get("email") or "NA",
                 "Verification Email Status": verification.get("email_status_display") or "NA",
                 "Aadhaar": verification.get("aadhaar") or "NA",
                 "Aadhaar Verified": "Yes" if verification.get("aadhaar_verified") else "No" if verification else "NA",
-
-                   # --- steps progress ---
                 "Basic Step": steps_status.get("Basic"),
                 "Address Step": steps_status.get("Address"),
                 "Verification Step": steps_status.get("Verification"),
@@ -223,7 +219,7 @@ class EnquiryReportDownloadAPIView(APIView):
             cleaned_data.append(row)
 
         columns = [
-            "Enquiry ID",
+            "Unique Code",
             "Survey Date",
             "Branch Name",
             "Product",

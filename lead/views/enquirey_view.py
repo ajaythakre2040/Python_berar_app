@@ -42,7 +42,7 @@ class EnquiryListCreateAPIView(APIView):
                 "total_counts": total_count
             }, status=status.HTTP_200_OK)
 
-        enquiries = enquiries.order_by("id")
+        enquiries = enquiries.order_by("-id")
 
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(enquiries, request)
@@ -62,9 +62,7 @@ class EnquiryListCreateAPIView(APIView):
     def post(self, request):
         enquiry_id = request.data.get("enquiry_id")
 
-        e = Enquiry.objects.last()
-        print(e.updated_at)                     
-        print(timezone.localtime(e.updated_at)) 
+        e = Enquiry.objects.last() 
 
         if enquiry_id:
             try:
@@ -99,7 +97,6 @@ class EnquiryListCreateAPIView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             
-
         # Create new enquiry
         serializer = EnquirySerializer(data=request.data)
         if serializer.is_valid():
@@ -109,6 +106,10 @@ class EnquiryListCreateAPIView(APIView):
                     is_steps=PercentageStatus.ENQUIRY_BASIC,
                     is_status=EnquiryStatus.DRAFT,
                 )
+
+                enquiry.refresh_from_db()   # 🔑 THIS is the only addition
+
+
                 LeadLog.objects.create(
                     enquiry=enquiry,
                     status="Basic Enquiry Form",

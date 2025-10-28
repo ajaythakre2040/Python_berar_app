@@ -15,8 +15,6 @@ class EnquiryAddressSerializer(serializers.ModelSerializer):
         
 
 
-
-
 class EnquiryLoanDetailsSerializer(serializers.ModelSerializer):
     loan_type_display = serializers.SerializerMethodField()
     loan_amount_range_display = serializers.SerializerMethodField()
@@ -80,10 +78,13 @@ class EnquirySelfieSerializer(serializers.ModelSerializer):
 
 class EnquirySerializer(serializers.ModelSerializer):
     # loan_type_display = serializers.SerializerMethodField()
+    unique_code = serializers.CharField(read_only=True)
+
     occupation_display = serializers.SerializerMethodField()
     is_status_display = serializers.SerializerMethodField()
     is_steps_display = serializers.SerializerMethodField()
     nature_of_business_display = serializers.SerializerMethodField()
+    kyc_document_display = serializers.SerializerMethodField()
 
     created_by = serializers.IntegerField(read_only=True)
     created_by_name = serializers.SerializerMethodField()
@@ -99,26 +100,15 @@ class EnquirySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Enquiry
-        # fields = [
-        #     "id", "name", "mobile_number", "lan_number",
-        #     "loan_type", "loan_type_display",
-        #     "occupation", "occupation_display",
-        #     "employer_name", "number_of_years_service",
-        #     "official_contact_number", "nature_of_service", "monthly_income",
-        #     "business_name", "business_place", "business_contact_number",
-        #     "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
-        #     "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
-        #     "enquiry_addresses", "enquiry_loan_details",
-        #     "enquiry_verification", "enquiry_images", "enquiry_selfies","created_by", "created_by_name", "created_by_code","created_at"
-        # ]
+       
         fields = [
-            "id", "name", "mobile_number", "lan_number",
+            "id", "name","unique_code","mobile_number", "lan_number",
             "occupation", "occupation_display",
             "employer_name", "number_of_years_service",
             "official_contact_number", "nature_of_service", "monthly_income",
             "business_name", "business_place", "business_contact_number",
             "nature_of_business","nature_of_business_display", "income", "interested", "kyc_collected",
-            "kyc_document", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
+            "kyc_document","kyc_document_display", "kyc_number", "is_status","is_status_display", "is_steps","is_steps_display",
             "enquiry_addresses",  
             "enquiry_verification", 
             "enquiry_loan_details",
@@ -128,8 +118,7 @@ class EnquirySerializer(serializers.ModelSerializer):
             "created_by", "created_by_name", "created_by_code","created_at"
         ]
 
-    # def get_loan_type_display(self, obj):
-    #     return obj.loan_type.name if obj.loan_type else None
+    
 
     def get_occupation_display(self, obj):
         return obj.get_occupation_display() if obj.occupation else None
@@ -142,6 +131,9 @@ class EnquirySerializer(serializers.ModelSerializer):
     
     def get_nature_of_business_display(self, obj):
         return obj.nature_of_business.name if obj.nature_of_business else None
+    
+    def get_kyc_document_display(self, obj):
+        return obj.get_kyc_document_display() if obj.kyc_document else None
     
     def get_created_by_name(self, obj):
         if obj.created_by:

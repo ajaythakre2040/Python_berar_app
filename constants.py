@@ -207,6 +207,12 @@ SALARIED = 1
 SELF_EMPLOYED = 2
 OCCUPATION_CHOICES = ((SALARIED, "salaried"), (SELF_EMPLOYED, "Self-Employed"))
 
+# kyc status    
+class KycStatus(models.IntegerChoices):
+    AADHAR = 1, "Aadhar"
+    PAN_CARD = 2, "Pan Card"
+    VOTER_ID = 3, "Voter Id"
+    DRIVING_LICENSE = 4, "driving License"
 
 # percentage status
 class PercentageStatus(models.IntegerChoices):

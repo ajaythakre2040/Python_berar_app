@@ -13,13 +13,13 @@ from django.http import HttpResponse
 from auth_system.models.user import TblUser  
 from ems.models.branch import TblBranch
 from datetime import date
-today = date.today()
-
+from datetime import timedelta
+from lead.models.enquiry_loan_details import EnquiryLoanDetails
 # from ems.models.emp_basic_profile import TblEmpBasicProfile
 from django.shortcuts import get_object_or_404
+from constants import PercentageStatus
 
 import pandas as pd
-
 
 
 class EnquiryReportAPIView(APIView):
@@ -32,39 +32,30 @@ class EnquiryReportAPIView(APIView):
         from_date = data.get("from_date")
         employee_id = data.get("employee_id")
         assign_to = data.get("assign_to")
-        status_val = data.get("status")
+        status_val = data.get("status") 
 
         filters = Q()
 
         if from_date and not to_date:
             return Response(
-                {
-                    "success": False,
-                    "message": "Please select 'to_date' when using 'from_date'.",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+                {"success": False, "message": "Please select 'to_date' when using 'from_date'."},
+                status=400,
             )
 
         if to_date:
             to_date = parse_date(to_date)
             if not to_date:
                 return Response(
-                    {
-                        "success": False,
-                        "message": "Invalid 'to_date' format. Use YYYY-MM-DD.",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"success": False, "message": "Invalid 'to_date' format. Use YYYY-MM-DD."},
+                    status=400,
                 )
 
             if from_date:
                 from_date = parse_date(from_date)
                 if not from_date:
                     return Response(
-                        {
-                            "success": False,
-                            "message": "Invalid 'from_date' format. Use YYYY-MM-DD.",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
+                        {"success": False, "message": "Invalid 'from_date' format. Use YYYY-MM-DD."},
+                        status=400,
                     )
                 filters &= Q(created_at__date__range=[from_date, to_date])
             else:
@@ -72,22 +63,27 @@ class EnquiryReportAPIView(APIView):
 
         if employee_id:
             filters &= Q(created_by=employee_id)
-
         if assign_to:
             filters &= Q(assign_to=assign_to)
 
         if status_val is not None:
-            if status_val == 5:
+            if int(status_val) == 5:
                 filters &= Q(is_status=0, created_at__date=date.today())
+            elif int(status_val) == 4:
+                today = date.today()
+                loan_qs = EnquiryLoanDetails.objects.filter(
+                    followup_pickup_date=today
+                )
+                enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
+                filters &= Q(id__in=enquiry_ids)
             else:
                 filters &= Q(is_status=status_val)
 
-        enquiries = Enquiry.objects.filter(filters).order_by("id")
+        enquiries = Enquiry.objects.filter(filters).order_by("-id")
 
         paginator = CustomPagination()
         page_data = paginator.paginate_queryset(enquiries, request)
         serializer = EnquirySerializer(page_data, many=True)
-        # serializer = EnquirySerializer(enquiries, many=True)
 
         return paginator.get_custom_paginated_response(
             data=serializer.data,
@@ -96,16 +92,7 @@ class EnquiryReportAPIView(APIView):
                 "message": "Enquiries report retrieved successfully (paginated).",
             }
         )
-
-        # return Response(
-        #     {
-        #         "success": True,
-        #         "message": "Enquiries report retrieved successfully.",
-        #         "data": serializer.data,
-        #     },
-        #     status=status.HTTP_200_OK,
-        # )
-
+    
 
 class EnquiryReportDownloadAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
@@ -137,14 +124,21 @@ class EnquiryReportDownloadAPIView(APIView):
             filters &= Q(created_by=employee_id)
         if assign_to:
             filters &= Q(assign_to=assign_to)
-        # if status_val is not None:
-        #     filters &= Q(is_status=status_val)
+      
         if status_val is not None:
             if status_val == 5:
                 filters &= Q(is_status=0, created_at__date=date.today())
+
+            elif status_val == 4:
+                # Follow-up scheduled today
+                today = date.today()
+                loan_qs = EnquiryLoanDetails.objects.filter(followup_pickup_date=today)
+                enquiry_ids = loan_qs.values_list("enquiry_id", flat=True).distinct()
+                filters &= Q(id__in=enquiry_ids)
+
             else:
                 filters &= Q(is_status=status_val)
-        enquiries = Enquiry.objects.filter(filters).order_by("id")
+        enquiries = Enquiry.objects.filter(filters).order_by("-id")
         serializer = EnquirySerializer(enquiries, many=True)
 
         user_ids = {enq.get("created_by") for enq in serializer.data if enq.get("created_by")}
@@ -158,11 +152,26 @@ class EnquiryReportDownloadAPIView(APIView):
         branch_map = {b["id"]: b for b in branches}
 
         cleaned_data = []
+        all_steps = dict(PercentageStatus.choices)
+
         for enquiry in serializer.data:
             user = user_map.get(enquiry.get("created_by"))
             branch = branch_map.get(user["branch_id"]) if user else None
 
+            verification = enquiry.get("enquiry_verification") or {}
+
+             # --- step completion mapping ---
+            step_val = enquiry.get("is_steps") or 0
+            steps_status = {}
+            for step_num, step_label in all_steps.items():
+                if step_num <= step_val:
+                    steps_status[step_label] = "Done"
+                else:
+                    steps_status[step_label] = "Not Done"
+
+
             row = {
+                "Unique Code": enquiry.get("unique_code"),
                 "Survey Date": enquiry.get("created_at"),
                 "Branch Name": branch["branch_name"] if branch else None,
                 "Product": None,  
@@ -181,6 +190,18 @@ class EnquiryReportDownloadAPIView(APIView):
                 "Loan Required On": None,
                 "Enquiry Type": None,
                 "Remark": None,
+                "Verification Mobile": verification.get("mobile") or "NA",
+                "Verification Mobile Status": verification.get("mobile_status_display") or "NA",
+                "Verification Email": verification.get("email") or "NA",
+                "Verification Email Status": verification.get("email_status_display") or "NA",
+                "Aadhaar": verification.get("aadhaar") or "NA",
+                "Aadhaar Verified": "Yes" if verification.get("aadhaar_verified") else "No" if verification else "NA",
+                "Basic Step": steps_status.get("Basic"),
+                "Address Step": steps_status.get("Address"),
+                "Verification Step": steps_status.get("Verification"),
+                "Loan Detail Step": steps_status.get("Loan_Detail"),
+                "Image Step": steps_status.get("Image"),
+                "Selfie Step": steps_status.get("Selfie"),
             }
 
             if enquiry.get("enquiry_loan_details"):
@@ -198,6 +219,7 @@ class EnquiryReportDownloadAPIView(APIView):
             cleaned_data.append(row)
 
         columns = [
+            "Unique Code",
             "Survey Date",
             "Branch Name",
             "Product",
@@ -216,6 +238,19 @@ class EnquiryReportDownloadAPIView(APIView):
             "Loan Required On",
             "Enquiry Type",
             "Remark",
+            "Verification Mobile",
+            "Verification Mobile Status",
+            "Verification Email",
+            "Verification Email Status",
+            "Aadhaar",
+            "Aadhaar Verified",
+             # --- step completion columns ---
+            "Basic Step",
+            "Address Step",
+            "Verification Step",
+            "Loan Detail Step",
+            "Image Step",
+            "Selfie Step",
         ]
 
         df = pd.DataFrame(cleaned_data)
@@ -225,3 +260,4 @@ class EnquiryReportDownloadAPIView(APIView):
         response['Content-Disposition'] = 'attachment; filename="enquiries_report.xlsx"'
         df.to_excel(response, index=False)
         return response
+

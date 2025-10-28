@@ -8,7 +8,7 @@ from datetime import date
 
 from lead.models.enquiry_loan_details import EnquiryLoanDetails
 from lead.models.enquiry import Enquiry
-from lead.models.lead_logs import LeadLog  # import LeadLog model
+from lead.models.lead_logs import LeadLog
 from lead.serializers.enquiry_serializer import EnquirySerializer
 from auth_system.permissions.token_valid import IsTokenValid
 from auth_system.utils.pagination import CustomPagination
@@ -193,7 +193,6 @@ class ReopenEnquiryView(APIView):
                 {"success": False, "message": "Only CLOSED enquiries can be reopened."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         remark = request.data.get("remark")
         reopen = request.data.get("reopen", False)
 
@@ -321,7 +320,6 @@ class AllCountAPIView(APIView):
             "success": True,
             "message": "Enquiry counts retrieved successfully.",
 
-
             "total_enquiries_count": Enquiry.objects.filter(
                 deleted_at__isnull=True,
                 is_status__in=[
@@ -343,8 +341,11 @@ class AllCountAPIView(APIView):
             ).count(),
             
             "total_closed_count": Enquiry.objects.filter(
-                is_status=EnquiryStatus.CLOSED,
-                deleted_at__isnull=True
+                deleted_at__isnull=True, 
+                is_status__in=[
+                    EnquiryStatus.CLOSED,
+                    EnquiryStatus.REJECT,
+                ]
             ).count(),
 
             "total_draft_count": total_draft_count,

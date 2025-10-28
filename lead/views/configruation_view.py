@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from django.utils import timezone
 
 from auth_system.permissions.token_valid import IsTokenValid
 from lead.models.configuration import Configuration

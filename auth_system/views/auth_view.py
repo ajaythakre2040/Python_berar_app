@@ -44,7 +44,7 @@ from constants import (
     LEAD,
 )
 import re
-from auth_system.utils.otp_utils import send_login_otp,send_Applogin_otp
+from auth_system.utils.otp_utils import send_login_otp, send_Applogin_otp
 from auth_system.utils.common import get_client_ip_and_agent
 
 
@@ -365,25 +365,35 @@ class ResendOTPView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated, IsTokenValid]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
-        access_token = str(request.auth)
-        ip_address, agent_browser = get_client_ip_and_agent(request)
+        auth_header = request.headers.get("Authorization")
 
-        if not all([refresh_token, ip_address, agent_browser]):
+        if (
+            not refresh_token
+            or not auth_header
+            or not auth_header.startswith("Bearer ")
+        ):
             return Response(
                 {
+                    "success": False,
                     "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": "Refresh token, IP address, and user agent are required.",
+                    "message": "Both refresh and access tokens are required.",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        access_token = auth_header.split(" ")[1]
+
+        ip_address = request.META.get("REMOTE_ADDR")
+        agent_browser = request.headers.get("User-Agent")
+
         session = (
             LoginSession.objects.filter(
-                user=request.user.id,
+                user=request.user,
+                is_active=True,
                 logout_at__isnull=True,
                 ip_address=ip_address,
                 agent_browser=agent_browser,
@@ -395,37 +405,46 @@ class LogoutView(APIView):
         if not session:
             return Response(
                 {
+                    "success": False,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "No active login session found for this device and IP.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if session.token != access_token:
+            return Response(
+                {
+                    "success": False,
                     "status_code": status.HTTP_403_FORBIDDEN,
-                    "message": "Invalid session details. Logout denied.",
+                    "message": "Access token does not match the active session.",
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         try:
+            session.is_active = False
+            session.logout_at = timezone.now()
+            session.save()
+
+            user = request.user
+            user.is_login = False
+            user.save(update_fields=["is_login"])
 
             RefreshToken(refresh_token).blacklist()
 
             BlackListedToken.objects.bulk_create(
                 [
-                    BlackListedToken(token=access_token, user=request.user),
-                    BlackListedToken(token=refresh_token, user=request.user),
+                    BlackListedToken(token=access_token, user=user),
+                    BlackListedToken(token=refresh_token, user=user),
                 ]
             )
 
-            session.logout_at = timezone.now()
-            session.is_active = False
-
-            session.save()
-
-            userData = TblUser.objects.filter(id=request.user.id).first()
-            if userData:
-                userData.is_login = False
-                userData.save()
-
             return Response(
                 {
+                    "success": True,
                     "status_code": status.HTTP_200_OK,
-                    "message": "Logout successful. Session closed and tokens blacklisted.",
+                    "message": "Logout successful.",
                 },
                 status=status.HTTP_200_OK,
             )
@@ -433,10 +452,12 @@ class LogoutView(APIView):
         except Exception as e:
             return Response(
                 {
-                    "status_code": status.HTTP_400_BAD_REQUEST,
-                    "message": f"Error: {str(e)}",
+                    "success": False,
+                    "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    "message": "An error occurred during logout.",
+                    "details": str(e),
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -505,7 +526,6 @@ class LeadLoginView(APIView):
                 "user": user.id,
                 "portal_id": portal_id,
                 "request_id": request_id,
-                # "otp_code": otp_code,
                 "otp_expire": expiry,
             },
             status=status.HTTP_200_OK,

@@ -19,8 +19,6 @@ from lead.models.enquiry_lead_assign_log import LeadAssignLog
 from ems.models.emp_basic_profile import TblEmpBasicProfile
 from django.db import transaction
 
-
-
 class EnquiryFollowUpCountAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTokenValid]
 

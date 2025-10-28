@@ -112,7 +112,16 @@ DATABASES = {
         "PORT": "5432",
     },
  }
-
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "berar_lead_db",
+#         "USER": "berar_lead_user",
+#         "PASSWORD": "berar@2025",
+#         "HOST": "10.0.100.52",
+#         "PORT": "5432",
+#     },
+# }
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # "rest_framework_simplejwt.authentication.JWTAuthentication",

@@ -164,7 +164,6 @@ class LoginView(APIView):
                     "status": "success",
                     "status_code": status.HTTP_200_OK,
                     "message": "Login successful.",
-                    "empoyee_id": user.employee_id,
                     "accessToken": access_token,
                     "refreshToken": refresh_token,
                 },
@@ -654,4 +653,97 @@ class LeadTwoFactorVerifyView(APIView):
                 "refreshToken": tokens["refresh"],
             },
             status=status.HTTP_200_OK,
+        )
+
+class DealerLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        username = data.get("username")
+        password = data.get("password")
+        login_portal = 1
+
+        ip_address, agent_browser = get_client_ip_and_agent(request)
+
+        if not all([username, password]):
+            return Response(
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                    "message": "Username and password are required.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = self._get_user(username)
+        if not user:
+            return Response(
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Invalid credentials.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if not check_password(password, user.password):
+            self._log_failed_attempt(user, username, ip_address, agent_browser)
+            return Response(
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Invalid credentials.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        LoginFailAttempts.objects.filter(username=username).delete()
+
+        tokens = generate_token(user, portal_id=login_portal)
+        access_token = tokens["access"]
+        refresh_token = tokens["refresh"]
+
+        create_login_session(
+            user.id,
+            login_portal,
+            access_token,
+            ip_address,
+            agent_browser,
+            request.headers,
+        )
+
+        return Response(
+            {
+                "status": "success",
+                "status_code": status.HTTP_200_OK,
+                "message": "Login successful.",
+                "accessToken": access_token,
+                "refreshToken": refresh_token,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def _get_user(self, username):
+        if username.isdigit() and len(username) == 10:
+            return TblUser.objects.filter(mobile_number=username).first()
+        elif "@" in username:
+            return TblUser.objects.filter(email=username).first()
+        return None
+
+    def _log_failed_attempt(self, user, username, ip, agent_browser):
+        user.login_attempt += 1
+        user.save()
+        LoginFailAttempts.objects.create(
+            username=username,
+            ip=ip,
+            agent_browser=agent_browser,
+            user_details={
+                "id": user.id,
+                "username": username,
+                "employee_code": user.employee_code,
+                "mobile_number": user.mobile_number,
+                "email": user.email,
+            },
+            created_at=timezone.now(),
         )

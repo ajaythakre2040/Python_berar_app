@@ -13,8 +13,8 @@ def generate_password(name: str, mobile_number: str) -> dict:
     formatted_name = name.replace(" ", "")
     capitalized_name = formatted_name.capitalize()
 
-    first_part = capitalized_name[:3]
-    while len(first_part) < 3:
+    first_part = capitalized_name[:4]
+    while len(first_part) < 4:
         first_part += str(random.randint(0, 9))
 
     last_four_digits = mobile_number[-4:]

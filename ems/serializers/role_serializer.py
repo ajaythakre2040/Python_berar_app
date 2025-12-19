@@ -66,44 +66,88 @@ class RoleSerializer(serializers.ModelSerializer):
         permissions_data = validated_data.pop("permission", None)
         request = self.context.get("request")
         user_id = request.user.id if request and request.user.is_authenticated else None
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.updated_by = user_id
         instance.updated_at = timezone.now()
         instance.save()
-
         if permissions_data:
             with transaction.atomic():
-
                 menu_ids = [
                     perm.get("menu_id")
                     for perm in permissions_data
                     if perm.get("menu_id")
                 ]
-
                 RolePermission.objects.filter(
                     role=instance,
                     portal_id=instance.portal_id,
                     menu_id__in=menu_ids,
                     deleted_at__isnull=True,
-                ).update(deleted_by=user_id, deleted_at=timezone.now())
-
+                ).delete()
                 for perm in permissions_data:
                     menu_id = perm.get("menu_id")
                     if not menu_id:
                         continue
-
                     RolePermission.objects.create(
                         role=instance,
                         portal_id=instance.portal_id,
                         created_by=user_id,
+                        updated_by= user_id,
+                        updated_at= timezone.now(),
                         **{
                             k: v
                             for k, v in perm.items()
                             if k not in ["portal_id", "deleted_by", "deleted_at"]
                         },
                     )
-
         return instance
+
+    
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+
+    

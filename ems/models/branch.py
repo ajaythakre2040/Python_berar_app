@@ -3,9 +3,7 @@ from django.db import models
 
 class TblBranch(models.Model):
     branch_name = models.CharField(max_length=255)
-    branch_id = models.CharField(
-        max_length=255, null=True, blank=True, unique=True
-    )  
+    branch_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     branch_code = models.CharField(max_length=255, unique=True)
     email = models.EmailField(null=True, blank=True)
     mobile_number = models.CharField(max_length=15, null=True, blank=True)
@@ -21,7 +19,8 @@ class TblBranch(models.Model):
     pin_code = models.CharField(max_length=10, null=True, blank=True)
     latitude = models.CharField(max_length=20, null=True, blank=True)
     longitude = models.CharField(max_length=20, null=True, blank=True)
-    range    = models.CharField(max_length=255, null=True, blank=True)
+    range = models.CharField(max_length=255, null=True, blank=True)
+    state_group_code = models.CharField(max_length=255, null=True, blank=True)
 
     created_by = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)

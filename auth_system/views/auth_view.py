@@ -36,6 +36,7 @@ from auth_system.utils.sms_utils import send_seized_emp_otp
 from auth_system.utils.token_utils import generate_token
 
 from constants import (
+    EmployeeStatus,
     OtpType,
     SmsType,
     DeliveryStatus,
@@ -46,6 +47,17 @@ from constants import (
 import re
 from auth_system.utils.otp_utils import send_login_otp, send_Applogin_otp
 from auth_system.utils.common import get_client_ip_and_agent
+from ems.models.emp_official_information import TblEmpOfficialInformation
+
+
+def get_employee_official_status(user):
+    
+    if not user or not user.employee_id:
+        return None
+
+    return TblEmpOfficialInformation.objects.filter(
+        employee_id=user.employee_id, deleted_at__isnull=True
+    ).first()
 
 
 class UserListCreateView(APIView):
@@ -118,7 +130,24 @@ class LoginView(APIView):
                 },
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+        official_info = get_employee_official_status(user)
+        if (
+            not official_info
+            or official_info.employment_status != EmployeeStatus.EMPLOYEE_ACTIVE
+        ):
+            if official_info and official_info.employment_status is not None:
+                status_display = official_info.get_employment_status_display().upper()
+            else:
+                status_display = "INACTIVE"
 
+            return Response(
+                {
+                    "status": "error",
+                    "status_code": status.HTTP_403_FORBIDDEN,
+                    "message": f"Login permission denied. Your current account status is '{status_display}'.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         if user.login_attempt >= MAX_LOGIN_ATTEMPTS:
             return Response(
                 {
@@ -654,6 +683,7 @@ class LeadTwoFactorVerifyView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
 
 class DealerLoginView(APIView):
     permission_classes = [AllowAny]

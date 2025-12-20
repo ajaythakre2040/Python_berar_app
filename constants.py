@@ -207,7 +207,7 @@ SALARIED = 1
 SELF_EMPLOYED = 2
 OCCUPATION_CHOICES = ((SALARIED, "salaried"), (SELF_EMPLOYED, "Self-Employed"))
 
-# kyc status    
+# kyc status
 class KycStatus(models.IntegerChoices):
     AADHAR = 1, "Aadhar"
     PAN_CARD = 2, "Pan Card"
@@ -273,7 +273,7 @@ class LanguageType(models.IntegerChoices):
     TELUGU = 5, "Telugu"
     KANNADA = 7, "Kannada"
     TAMIL = 8, "Tamil"
-    
+
 
 class EnquiryLeadStatus(models.TextChoices):
     DRAFT = "DRAFT", "Draft"
@@ -284,8 +284,7 @@ class EnquiryLeadStatus(models.TextChoices):
     # percentage status
 
 
-
-#ticket constents
+# ticket constents
 
 class TicketPriority(models.IntegerChoices):
     LOW = 1, "Low"
@@ -298,3 +297,9 @@ class TicketStatus(models.IntegerChoices):
     TICKET_CLOSED = 2, "CLOSED"
     TICKET_ACTIVE = 3, "ACTIVE"
     TICKET_REJECT = 4, "REJECT"
+
+
+class EmployeeStatus(models.IntegerChoices):
+    EMPLOYEE_DEACTIVE = 0, "DEACTIVE"
+    EMPLOYEE_ACTIVE = 1, "ACTIVE"
+    EMPLOYEE_TERMINATE = 2, "TERMINATE"

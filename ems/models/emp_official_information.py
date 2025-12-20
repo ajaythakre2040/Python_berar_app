@@ -4,6 +4,7 @@ import uuid
 from django.db import models
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from constants import EmployeeStatus
 from ems.models.emp_basic_profile import TblEmpBasicProfile
 
 
@@ -40,7 +41,11 @@ class TblEmpOfficialInformation(models.Model):
         db_column="reporting_to",
         related_name="reporting_employees",
     )
-    employment_status = models.IntegerField(null=True, blank=True)
+    employment_status = models.IntegerField(
+        choices=EmployeeStatus.choices,  
+        default=EmployeeStatus.EMPLOYEE_ACTIVE, 
+        null=True, 
+        blank=True)
     remarks = models.TextField(null=True, blank=True)  
 
     profile_photo = models.ImageField(

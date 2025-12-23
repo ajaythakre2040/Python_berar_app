@@ -261,4 +261,9 @@ GET    {Base URL}lead/enquiries/ticket/{id}/
 GET    {Base URL}lead/enquiries/ticket/?count_only=true
 
 
-    
+    # UPLOAD URLs
+POST    {Base URL}ems/upload/branch/
+POST    {Base URL}ems/upload/department/
+POST    {Base URL}ems/upload/designation/
+POST    {Base URL}ems/upload/dealer/
+POST    {Base URL}ems/upload/subdealer/

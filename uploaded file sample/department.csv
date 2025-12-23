@@ -1,0 +1,11 @@
+department_name,department_email,hide_from_client
+IT Infrastructure,it@ems.com,False
+Human Resources,hr@ems.com,True
+Sales & Marketing,sales@ems.com,False
+Finance & Accounts,accounts@ems.com,True
+Logistics & Supply,logistics@ems.com,False
+Quality Control,qc@ems.com,False
+Customer Support,support@ems.com,False
+Legal Department,legal@ems.com,True
+R&D Department,rd@ems.com,False
+Admin & Facilities,admin@ems.com,False

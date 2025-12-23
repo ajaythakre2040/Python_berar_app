@@ -1,0 +1,11 @@
+designation_name,designation_code,department_id,designation_priority,parent_designation_id
+Chief Executive,CEO01,1,10,0
+Operation Manager,OM02,5,8,1
+Senior Developer,SD03,1,5,2
+Junior Developer,JD04,1,3,3
+HR Specialist,HRS05,2,4,2
+Accountant,ACC06,4,4,2
+Marketing Head,MH07,3,7,1
+Sales Executive,SE08,3,2,7
+Admin Assistant,AA09,10,1,2
+Legal Advisor,LA10,8,6,1

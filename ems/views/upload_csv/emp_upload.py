@@ -12,10 +12,10 @@ from ems.models.emp_nominee_details import TblEmpNomineeDetails
 from ems.models.emp_official_information import TblEmpOfficialInformation
 from auth_system.models import TblUser
 
-from ..models.branch import TblBranch
-from ..models.department import TblDepartment
-from ..models.designation import TblDesignation
-from ..models.role import Role
+from ...models.branch import TblBranch
+from ...models.department import TblDepartment
+from ...models.designation import TblDesignation
+from ...models.role import Role
 
 
 def parse_custom_date(date_str):

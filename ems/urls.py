@@ -14,7 +14,6 @@ from ems.views.designation_view import (
     TblDesignationDetailView,
 )
 
-from ems.views.import_emp_csv_view import UploadCSVView
 from ems.views.menu_view import (
     MenuListCreateView,
     MenuDetailView,
@@ -38,12 +37,25 @@ from ems.views.emp_nominee_views import (
     EmpNomineeDetailsListCreateView,
     EmpNomineeDetailsDetailView,
 )
-from ems.views.emp_official_information_view import EmpOfficialInfoView, EmpOfficialInfoDetailView
+from ems.views.emp_official_information_view import (
+    EmpOfficialInfoView,
+    EmpOfficialInfoDetailView,
+)
 
-from ems.views.role_permission_view import RolePermissionDetailView, RolePermissionListCreateView
+from ems.views.role_permission_view import (
+    RolePermissionDetailView,
+    RolePermissionListCreateView,
+)
 from ems.views.role_view import RoleDetailView, RoleListCreateView
 from ems.views.state_master import StateDetailAPIView, StateListCreateAPIView
 from ems.views.subdealer_view import SubDealerDetailView, SubDealerListCreateView
+
+from ems.views.upload_csv.emp_upload import UploadCSVView
+from ems.views.upload_csv.branch_upload import BranchCSVUploadView
+from ems.views.upload_csv.dealer_upload import DealerCSVUploadView
+from ems.views.upload_csv.department_upload import DepartmentCSVUploadView
+from ems.views.upload_csv.designation_upload import DesignationCSVUploadView
+from ems.views.upload_csv.subdealer__upload import SubDealerCSVUploadView
 
 
 urlpatterns = [
@@ -154,8 +166,25 @@ urlpatterns = [
     ),
     path("states/", StateListCreateAPIView.as_view(), name="state-list-create"),
     path("states/<int:pk>/", StateDetailAPIView.as_view(), name="state-detail"),
-    path("upload-Empcsv/", UploadCSVView.as_view(), name="upload-csv"),
+    path("upload/Emp/", UploadCSVView.as_view(), name="emp-upload-csv"),
+    path("upload/branch/", BranchCSVUploadView.as_view(), name="branch-upload-csv"),
+    path(
+        "upload/department/",
+        DepartmentCSVUploadView.as_view(),
+        name="department-csv-upload",
+    ),
+    path(
+        "upload/designation/",
+        DesignationCSVUploadView.as_view(),
+        name="designation-csv-upload",
+    ),
+    path("upload/dealer/", DealerCSVUploadView.as_view(), name="dealer-csv-upload"),
+    path(
+        "upload/subdealer/",
+        SubDealerCSVUploadView.as_view(),
+        name="subdealer-csv-upload",
+    ),
 ]
 
 
-urlpatterns 
+urlpatterns

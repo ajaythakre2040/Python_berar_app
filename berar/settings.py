@@ -16,7 +16,7 @@ import os
 from corsheaders.defaults import default_headers
 from decouple import config
 
-FERNET_KEY =b'VaEN1_M4XqzKH3VUEHYR-RZ0xKxVYjUv2Yd7y3GGB0o='
+FERNET_KEY = b"VaEN1_M4XqzKH3VUEHYR-RZ0xKxVYjUv2Yd7y3GGB0o="
 # Example: Fernet.generate_key()
 
 # from decouple import config
@@ -104,14 +104,14 @@ WSGI_APPLICATION = "berar.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.db.backends.postgresq",
         "NAME": "db_berar_app",
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",
         "PORT": "5432",
     },
- }
+}
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
@@ -194,7 +194,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 # TIME_ZONE = "UTC"
-TIME_ZONE = 'Asia/Kolkata'  # or your local timezone
+TIME_ZONE = "Asia/Kolkata"  # or your local timezone
 
 USE_I18N = True
 

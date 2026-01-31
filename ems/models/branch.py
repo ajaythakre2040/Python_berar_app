@@ -20,7 +20,7 @@ class TblBranch(models.Model):
     latitude = models.CharField(max_length=20, null=True, blank=True)
     longitude = models.CharField(max_length=20, null=True, blank=True)
     range = models.CharField(max_length=255, null=True, blank=True)
-    state_group_code = models.CharField(max_length=255, null=True, blank=True)
+    # state_group_code = models.CharField(max_length=255, null=True, blank=True)
 
     created_by = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)

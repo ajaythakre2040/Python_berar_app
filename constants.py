@@ -303,3 +303,6 @@ class EmployeeStatus(models.IntegerChoices):
     EMPLOYEE_DEACTIVE = 0, "DEACTIVE"
     EMPLOYEE_ACTIVE = 1, "ACTIVE"
     EMPLOYEE_TERMINATE = 2, "TERMINATE"
+
+
+PRIORITY_MAPPING = {"High": 1, "Medium": 2, "Low": 3}

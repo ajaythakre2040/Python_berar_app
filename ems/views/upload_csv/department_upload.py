@@ -1,5 +1,8 @@
 import csv
 import io
+import os
+from datetime import datetime
+from django.conf import settings
 from django.db import transaction, IntegrityError
 from rest_framework import status
 from rest_framework.views import APIView
@@ -14,112 +17,131 @@ class DepartmentCSVUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # --- 1. FILE LEVEL ERRORS ---
-        if "file" not in request.FILES:
+        # --- 1. PRE-VALIDATION ---
+        file = request.FILES.get("file")
+        if not file:
             return Response(
-                {"error": "File nahi mili. Please 'file' key mein upload karein."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
             )
-
-        file = request.FILES["file"]
 
         if not file.name.endswith(".csv"):
             return Response(
-                {"error": "Sirf .csv files allowed hain."},
+                {"error": "Only .csv files are allowed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        success_rows = []
-        error_rows = []
+        success_count = 0
+        all_failed_rows = []
+        internal_name_tracker = set()
 
         try:
-            # --- 2. ENCODING ERRORS ---
-            # utf-8-sig Excel ke special characters (BOM) ko handle karta hai
+            # handle BOM and decode
             decoded_file = file.read().decode("utf-8-sig")
-            csv_data = io.StringIO(decoded_file)
-            csv_reader = csv.DictReader(csv_data)
+            csv_reader = csv.DictReader(io.StringIO(decoded_file))
 
-            # --- 3. COLUMN/HEADER ERRORS ---
+            # --- 2. HEADER VALIDATION ---
             required_columns = ["department_name"]
-            if not csv_reader.fieldnames or not all(
-                col in csv_reader.fieldnames for col in required_columns
-            ):
-                missing = [
-                    c
-                    for c in required_columns
-                    if c not in (csv_reader.fieldnames or [])
-                ]
+            actual_headers = [h.strip().lower() for h in (csv_reader.fieldnames or [])]
+
+            if not any(col in actual_headers for col in required_columns):
                 return Response(
-                    {"error": f"CSV headers missing: {missing}"},
+                    {
+                        "error": f"CSV headers missing. Required: {required_columns}",
+                        "found": csv_reader.fieldnames,
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # --- 4. ROW LEVEL ERRORS ---
-            for index, row in enumerate(csv_reader, start=1):
-                # Safai: Extra spaces hatana aur empty ko None banana
-                data = {k: (v.strip() if v else None) for k, v in row.items()}
-                dept_name = data.get("department_name")
+            # --- 3. ROW PROCESSING ---
+            for index, row in enumerate(csv_reader, start=2):
+                # Clean data
+                clean_row = {
+                    k.strip().lower(): (v.strip() if v else None)
+                    for k, v in row.items()
+                    if k
+                }
+                dept_name = clean_row.get("department_name")
 
                 try:
                     with transaction.atomic():
-                        # Serializer validation (Duplicate name/email check yahi se hoga)
-                        serializer = TblDepartmentSerializer(data=data)
+                        # A. Missing Check
+                        if not dept_name:
+                            raise ValueError("department_name is missing or empty.")
 
-                        if serializer.is_valid():
-                            # created_by IntegerField hai isliye .id bhej rahe hain
-                            serializer.save(created_by=request.user.id)
-                            success_rows.append(dept_name)
-                        else:
-                            # Validation failure (e.g. Duplicate name)
-                            error_rows.append(
-                                {
-                                    "row": index,
-                                    "name": dept_name or "Row No " + str(index),
-                                    "errors": serializer.errors,
-                                }
+                        # B. Internal CSV Duplicate Check
+                        if dept_name.lower() in internal_name_tracker:
+                            raise ValueError(
+                                f"Duplicate department '{dept_name}' found inside this CSV."
+                            )
+                        internal_name_tracker.add(dept_name.lower())
+
+                        # C. Database Duplicate Check
+                        if TblDepartment.objects.filter(
+                            department_name__iexact=dept_name
+                        ).exists():
+                            raise ValueError(
+                                f"Department '{dept_name}' already exists in the system."
                             )
 
-                except IntegrityError as ie:
-                    error_rows.append(
-                        {
-                            "row": index,
-                            "errors": f"Database Constraint Error: {str(ie)}",
-                        }
-                    )
-                except Exception as e:
-                    error_rows.append(
-                        {"row": index, "errors": f"Unexpected Row Error: {str(e)}"}
-                    )
+                        # D. Serializer Save
+                        serializer = TblDepartmentSerializer(data=clean_row)
+                        if serializer.is_valid():
+                            serializer.save(created_by=request.user.id)
+                            success_count += 1
+                        else:
+                            readable_errors = " | ".join(
+                                [f"{k}: {v[0]}" for k, v in serializer.errors.items()]
+                            )
+                            raise ValueError(readable_errors)
 
-            # --- 5. RESPONSE SUMMARY ---
-            # Agar sab success hai toh 200, agar mix hai toh 207, agar sab fail toh 400
-            final_status = status.HTTP_200_OK
-            if error_rows and success_rows:
-                final_status = status.HTTP_207_MULTI_STATUS
-            elif error_rows and not success_rows:
-                final_status = status.HTTP_400_BAD_REQUEST
+                except Exception as e:
+                    row_err = dict(row)
+                    row_err["upload_status_reason"] = str(e)
+                    row_err["Row Number"] = index
+                    all_failed_rows.append(row_err)
+
+            # --- 4. ERROR REPORT GENERATION ---
+            report_file_url = None
+            if all_failed_rows:
+                report_file_url = self.generate_error_report(
+                    all_failed_rows, csv_reader.fieldnames, request
+                )
 
             return Response(
                 {
                     "message": "Processing complete",
                     "summary": {
-                        "total": len(success_rows) + len(error_rows),
-                        "success": len(success_rows),
-                        "failed": len(error_rows),
+                        "total": success_count + len(all_failed_rows),
+                        "success": success_count,
+                        "failed": len(all_failed_rows),
                     },
-                    "success_data": success_rows,
-                    "failed_data": error_rows,
+                    "report_file": report_file_url,
                 },
-                status=final_status,
+                status=(
+                    status.HTTP_200_OK
+                    if not all_failed_rows
+                    else status.HTTP_207_MULTI_STATUS
+                ),
             )
 
-        except UnicodeDecodeError:
-            return Response(
-                {"error": "File encoding galat hai. Please UTF-8 CSV use karein."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         except Exception as fatal_e:
-            return Response(
-                {"error": f"Server Fatal Error: {str(fatal_e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return Response({"error": f"Fatal Error: {str(fatal_e)}"}, status=500)
+
+    def generate_error_report(self, failed_rows, original_headers, request):
+        log_folder = os.path.join(settings.MEDIA_ROOT, "error_logs")
+        os.makedirs(log_folder, exist_ok=True)
+
+        # Format: failed_department_28-01-2026_time_17-03-18.csv
+        now = datetime.now()
+        filename = f"failed_department_{now.strftime('%d-%m-%Y')}_time_{now.strftime('%H-%M-%S')}.csv"
+        file_path = os.path.join(log_folder, filename)
+
+        # Columns for error file
+        fieldnames = ["Row Number", "upload_status_reason"] + list(original_headers)
+
+        with open(file_path, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(failed_rows)
+
+        return request.build_absolute_uri(f"{settings.MEDIA_URL}error_logs/{filename}")

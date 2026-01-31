@@ -1,11 +1,11 @@
-dealer_id,branch_id,code,name,state,district,city,pin_code,address_1,mobile_number,email
-1,B001,S001,Balaji Sub-Dealer,Maharashtra,Nagpur,Nagpur,440001,Sitabuldi,8001001001,balaji@sub.com
-1,B001,S002,Krishna Sub-Dealer,Maharashtra,Nagpur,Nagpur,440002,Dharampeth,8001001002,krishna@sub.com
-2,B001,S003,Pune Sub-Unit,Maharashtra,Pune,Pune,411002,Kothrud,8001001003,pune_sub@sub.com
-3,B002,S004,NCR Traders,Delhi,Gautam Buddh Nagar,Noida,201301,Sec 18,8001001004,ncr@sub.com
-4,B003,S005,Garden City Auto,Karnataka,Bangalore Urban,Bangalore,560002,Indiranagar,8001001005,garden@sub.com
-5,B004,S006,Kolkata Small Unit,West Bengal,Howrah,Howrah,711101,Station Road,8001001006,howrah@sub.com
-6,B005,S007,Rajkot Local,Gujarat,Rajkot,Rajkot,360002,Ring Road,8001001007,rajkot@sub.com
-7,B006,S008,Bhopal Sub-Agency,Madhya Pradesh,Bhopal,Bhopal,462002,New Market,8001001008,bhopal@sub.com
-8,B007,S009,Sadar Sub-Motors,Maharashtra,Nagpur,Nagpur,440011,Mount Rd,8001001009,sadar@sub.com
-9,B008,S010,Baner Sub-Services,Maharashtra,Pune,Pune,411046,Aundh,8001001010,baner_sub@sub.com
+code,name,dealer_name,branch_name,mobile_number,email,address_1,district,state,city,pin_code
+S001,Apex Sub-1,Apex Motors,Adilabad,9001002001,sub1@apex.com,Main Road Market,Adilabad,Telangana,Adilabad,504001
+S002,Pawar Sub-1,Pawar Auto,Ahmednagar,9001002002,sub1@pawar.com,Station Area,Ahmednagar,Maharashtra,Ahmednagar,414001
+S003,Vidarbha Sub-1,Vidarbha Cars,Akola,9001002003,sub1@vidarbha.com,New Bypass Road,Akola,Maharashtra,Akola,444001
+S004,Capital Sub-1,Capital Wheels,Alibag,9001002004,sub1@capital.com,Beach Side,Raigad,Maharashtra,Alibag,402201
+S005,Royal Sub-1,Royal Motors,Amravati,9001002005,sub1@royal.com,City Square Mall,Amravati,Maharashtra,Amravati,444601
+S006,City Sub-1,City Car Gallery,Aurangabad,9001002007,sub1@city.com,Sector 1 Cidco,Aurangabad,Maharashtra,Aurangabad,431001
+S007,Coastal Sub-1,Coastal Dealers,Baramati,9001002008,sub1@coastal.com,MIDC Road,Pune,Maharashtra,Baramati,413102
+S008,Apex Sub-2,Apex Motors,Bhopal,9001002009,sub2@apex.com,Arera Colony,Bhopal,Madhya Pradesh,Bhopal,462001
+S009,Pawar Sub-2,Pawar Auto,Bilaspur,9001002010,sub2@pawar.com,Link Road No 3,Bilaspur,Chhattisgarh,Bilaspur,495001
+S010,Vidarbha Sub-2,Vidarbha Cars,Chandrapur,9001002011,sub2@vidarbha.com,Civil Lines,Chandrapur,Maharashtra,Chandrapur,442401

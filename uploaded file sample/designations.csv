@@ -1,0 +1,36 @@
+designation_name,parent_designation_name,designation_code,designation_priority,department_name
+Branch Sales Manager,Manager,BSM_NEW,Medium,Marketing
+Relationship Manager,Manager,RM_NEW,Medium,Marketing
+Area Sales Manager,Manager,ASM_NEW,High,Marketing
+Risk Executive,Senior Executive,RISK_EXE,High,Operations
+Senior RCU Executive,Senior Executive,RCU_EXE,High,Operations
+Branch Manager,Zonal Manager,BM_NEW,High,Operations
+Sales Manager,Area Sales Manager,SM_NEW,Medium,Marketing
+Area Credit Manager,Regional Credit Manager,ACM_NEW,High,Finance
+Credit Manager,Area Credit Manager,CM_NEW,High,Finance
+Manager,Zonal Manager,MGR_GEN,Medium,Operations
+DISBMT OFFICER,Executive,DISB_OFF,Low,Finance
+Telecaller,Executive,TELE_EXE,Low,Marketing
+Operations Officer,Executive,OPS_OFF,Medium,Operations
+Assistant Vice President,Vice President,AVP_NEW,High,Operations
+Regional Sales Manager,National Business Head,RSM_NEW,High,Marketing
+Assistant Credit Manager,Regional Credit Manager,ASST_CM,Medium,Finance
+Senior Credit Officer,Credit Manager,SR_CO,Medium,Finance
+Assistant Manager Legal,Manager,AM_LEGAL,Medium,Legal
+Vice President-Credit,National Business Head,VP_CRED,High,Finance   
+Field Investigation Executive,Executive,FI_EXE,Low,Operations
+Cluster Sales Manager,Regional Sales Manager,CSM_NEW,High,Marketing
+Sales Executive,Sales Manager,SE_NEW,Low,Marketing
+Circle Manager,Zonal Business Head,CIR_MGR,High,Marketing
+Sales Executive - Refinance,Team Leader,SE_REF,Low,Marketing
+Unit Manager,Branch Manager,UNIT_MGR,Medium,Operations
+State Head,National Business Head,ST_HEAD,High,Operations
+Team Leader,Manager,TL_NEW,Medium,Operations
+SALES-TEAM LEADER,Sales Manager,STL_NEW,Medium,Marketing
+Zonal Business Head,National Business Head,ZBH_NEW,High,Marketing
+Business Development Officer,Sales Manager,BDO_NEW,Medium,Marketing
+Executive - Refinance,Executive,EXE_REF,Low,Marketing
+National Business Head,CEO,NBH_NEW,High,Marketing
+State Head - CG2,State Head,ST_CG2,High,Operations
+State Head - CG1,State Head,ST_CG1,High,Operations
+OffROll Sales Executive,Team Leader,OFF_SE,Low,Marketing

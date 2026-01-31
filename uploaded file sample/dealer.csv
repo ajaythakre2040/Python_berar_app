@@ -1,11 +1,8 @@
-branch_id,code,name,state,district,city,pin_code,address_1,mobile_number,email,latitude,longitude
-B001,D001,Apex Motors,Maharashtra,Nagpur,Nagpur,440001,Civil Lines,9001001001,apex@deal.com,21.14,79.08
-B001,D002,Global Cars,Maharashtra,Pune,Pune,411001,Viman Nagar,9001001002,global@deal.com,18.52,73.85
-B002,D003,Delhi Wheels,Delhi,Delhi,Delhi,110001,Connaught Place,9001001003,delhi@deal.com,28.61,77.20
-B003,D004,Royal Auto,Karnataka,Bangalore,Bangalore,560001,MG Road,9001001004,royal@deal.com,12.97,77.59
-B004,D005,East Coast Dealers,WB,Kolkata,Kolkata,700001,Park Street,9001001005,east@deal.com,22.57,88.36
-B005,D006,Sardar Motors,Gujarat,Rajkot,Rajkot,360001,Main Road,9001001006,sardar@deal.com,22.30,70.80
-B006,D007,Central Auto,MP,Bhopal,Bhopal,462001,Arera Colony,9001001007,central@deal.com,23.25,77.41
-B007,D008,Nagpur Traders,Maharashtra,Nagpur,Nagpur,440010,Sadar,9001001008,nagpur@deal.com,21.15,79.09
-B008,D009,Pune Services,Maharashtra,Pune,Pune,411045,Baner,9001001009,pune_serv@deal.com,18.55,73.78
-B009,D010,Chennai Tyres,TN,Chennai,Chennai,600002,Anna Salai,9001001010,chennai@deal.com,13.08,80.27
+code,name,branch,state,district,city,pin_code,address_1,mobile_number,email,latitude,longitude
+D001,Apex Motors,Nagpur,Maharashtra,Nagpur,Nagpur,440001,Civil Lines,9876543210,apex@deal.com,21.14,79.08
+D002,Pawar Auto,Baramati,Maharashtra,Pune,Baramati,413102,Main Market,9876543211,pawar@deal.com,18.15,74.58
+D003,Vidarbha Cars,Akola,Maharashtra,Akola,Akola,444001,NH-6 Road,9876543212,vidarbha@deal.com,20.70,77.00
+D004,Capital Wheels,Bhopal,MP,Bhopal,Bhopal,462001,Arera Colony,9876543213,capital@deal.com,23.25,77.41
+D005,Royal Motors,Indore Branch,MP,Indore,Indore,452001,Vijay Nagar,9876543214,royal@deal.com,22.71,75.85
+D006,City Car Gallery,Amravati,Maharashtra,Amravati,Amravati,444601,Rajapeth,9876543215,city@deal.com,20.93,77.75
+D007,Coastal Dealers,Ratnagiri,Maharashtra,Ratnagiri,Ratnagiri,415612,Konkan Road,9876543216,coastal@deal.com,16.99,73.31

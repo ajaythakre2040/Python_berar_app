@@ -1,6 +1,12 @@
 import csv
 import io
-from django.db import transaction, IntegrityError
+import os
+import re
+from datetime import datetime
+from django.conf import settings
+from django.db import transaction
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,115 +17,138 @@ from ems.serializers.branch_serializers import TblBranchSerializer
 
 
 class BranchCSVUploadView(APIView):
-    # This view requires a valid user session/token
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # 1. Double check User Object (Prevents 500 errors if middleware fails)
-        if not request.user or not hasattr(request.user, "id"):
-            return Response(
-                {"detail": "User context missing. Please re-authenticate."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # 2. File validation
-        if "file" not in request.FILES:
+        file = request.FILES.get("file")
+        if not file:
             return Response(
                 {"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        file = request.FILES["file"]
-        if not file.name.endswith(".csv"):
-            return Response(
-                {"error": "Only CSV files are allowed."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        success_rows = []
-        error_rows = []
+        success_count = 0
+        error_count = 0
+        all_failed_rows = []
+        internal_code_tracker = set()
 
         try:
-            # 3. Reading the file with 'utf-8-sig' to handle Excel's hidden BOM characters
             decoded_file = file.read().decode("utf-8-sig")
-            csv_data = io.StringIO(decoded_file)
-            csv_reader = csv.DictReader(csv_data)
+            csv_reader = csv.DictReader(io.StringIO(decoded_file))
 
-            # 4. Schema check: Ensure headers match your expectations
+            # --- 1. Required Headers Check ---
+            # Aapke model ke hisab se mandatory fields
             required_headers = ["branch_name", "branch_code"]
-            if not csv_reader.fieldnames or not all(
-                h in csv_reader.fieldnames for h in required_headers
-            ):
+            actual_headers = [h.strip().lower() for h in (csv_reader.fieldnames or [])]
+            missing_headers = [h for h in required_headers if h not in actual_headers]
+
+            if missing_headers:
                 return Response(
-                    {"error": f"CSV missing headers. Required: {required_headers}"},
+                    {
+                        "error": "CSV columns missing",
+                        "missing": missing_headers,
+                        "tip": f"Please ensure these headers exist: {', '.join(required_headers)}",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # 5. Iterative Processing
-            for index, row in enumerate(csv_reader, start=1):
-                # Strip whitespace from every cell
-                clean_row = {k: (v.strip() if v else None) for k, v in row.items()}
-                branch_code = clean_row.get("branch_code")
+            # --- 2. Row Processing ---
+            for index, row in enumerate(csv_reader, start=2):
+                clean_row = {
+                    k.strip().lower(): (v.strip() if v else None)
+                    for k, v in row.items()
+                }
 
                 try:
                     with transaction.atomic():
-                        # Uniqueness Guard
-                        if TblBranch.objects.filter(branch_code=branch_code).exists():
-                            error_rows.append(
-                                {
-                                    "row_index": index,
-                                    "branch_code": branch_code,
-                                    "error": "Branch code already exists.",
-                                }
-                            )
-                            continue
+                        branch_code = clean_row.get("branch_code")
 
+                        # A. Missing Data Check
+                        if not branch_code:
+                            raise ValueError("branch_code is required but found empty.")
+
+                        # B. Internal CSV Duplicate Check
+                        if branch_code in internal_code_tracker:
+                            raise ValueError(
+                                f"Duplicate branch_code '{branch_code}' found inside this CSV file."
+                            )
+                        internal_code_tracker.add(branch_code)
+
+                        # C. Database Duplicate Check
+                        if TblBranch.objects.filter(branch_code=branch_code).exists():
+                            raise ValueError(
+                                f"Branch with code '{branch_code}' already exists in database."
+                            )
+
+                        # D. Email & Mobile Format Validation
+                        email = clean_row.get("email")
+                        if email and email.lower() not in ["null", "nan", "none"]:
+                            try:
+                                validate_email(email)
+                            except ValidationError:
+                                raise ValueError(f"Invalid email format: {email}")
+
+                        # E. Serializer Validation & Save
                         serializer = TblBranchSerializer(data=clean_row)
                         if serializer.is_valid():
-                            # Save with the current user's integer ID
                             serializer.save(created_by=request.user.id)
-                            success_rows.append(branch_code)
+                            success_count += 1
                         else:
-                            error_rows.append(
-                                {
-                                    "row_index": index,
-                                    "branch_code": branch_code,
-                                    "error": serializer.errors,
-                                }
+                            # Capturing Serializer/Model errors (like max_length)
+                            err_msg = " | ".join(
+                                [f"{k}: {v[0]}" for k, v in serializer.errors.items()]
                             )
+                            raise ValueError(err_msg)
 
-                except IntegrityError as ie:
-                    error_rows.append(
-                        {"row_index": index, "error": f"Database Conflict: {str(ie)}"}
-                    )
-                except Exception as row_e:
-                    error_rows.append(
-                        {
-                            "row_index": index,
-                            "error": f"Unexpected Row Error: {str(row_e)}",
-                        }
-                    )
+                except Exception as e:
+                    error_count += 1
+                    row_err = dict(row)
+                    row_err["upload_status_reason"] = str(e)
+                    all_failed_rows.append(row_err)
 
-            # 6. Final Summary
+            # --- 3. Generate Error Report with Specific Filename ---
+            report_url = None
+            if all_failed_rows:
+                report_url = self.generate_error_report(
+                    all_failed_rows, csv_reader.fieldnames, request
+                )
+
             return Response(
                 {
-                    "message": "CSV Processing Task Finished",
+                    "message": "Processing finished",
                     "summary": {
-                        "total_processed": index,
-                        "success_count": len(success_rows),
-                        "error_count": len(error_rows),
+                        "created": success_count,
+                        "failed_or_skipped": error_count,
+                        "total": success_count + error_count,
                     },
-                    "success_list": success_rows,
-                    "error_details": error_rows,
+                    "report_file": report_url,
                 },
                 status=(
-                    status.HTTP_207_MULTI_STATUS
-                    if error_rows and success_rows
-                    else status.HTTP_200_OK
+                    status.HTTP_200_OK
+                    if not all_failed_rows
+                    else status.HTTP_207_MULTI_STATUS
                 ),
             )
 
         except Exception as fatal_e:
             return Response(
-                {"error": f"Critical system failure: {str(fatal_e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {"error": f"Fatal System Error: {str(fatal_e)}"}, status=500
             )
+
+    def generate_error_report(self, failed_rows, original_headers, request):
+        log_folder = os.path.join(settings.MEDIA_ROOT, "error_logs")
+        os.makedirs(log_folder, exist_ok=True)
+
+        # Aapka Required Format: failed_branch_28-01-2026_time_17-03-18.csv
+        now = datetime.now()
+        filename = f"failed_branch_{now.strftime('%d-%m-%Y')}_time_{now.strftime('%H-%M-%S')}.csv"
+        file_path = os.path.join(log_folder, filename)
+
+        # Fieldnames setup (Reason column first)
+        fieldnames = ["upload_status_reason"] + list(original_headers)
+
+        with open(file_path, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(failed_rows)
+
+        return request.build_absolute_uri(f"{settings.MEDIA_URL}error_logs/{filename}")

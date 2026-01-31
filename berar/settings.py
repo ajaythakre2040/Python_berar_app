@@ -105,7 +105,7 @@ WSGI_APPLICATION = "berar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db_berar_app",
+        "NAME": "db_berar_app3",
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",
@@ -210,3 +210,13 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Bulk import speed badhane ke liye MD5 allow kiya gaya hai
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.MD5PasswordHasher",
+]

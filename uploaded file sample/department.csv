@@ -1,6 +1,10 @@
 department_name,department_email,hide_from_client
-IT Infrastructure,it@ems.com,False
-Human Resources,hr@ems.com,True
+admi Resources,hr@ems.com,False
+IT Department,it@ems.com,False
+HR Department,hr_dept@ems.com,False
+Finance,finance@ems.com,False
+Marketing,marketing@ems.com,False
+IT Infrastructure,it_infra@ems.com,False
 Sales & Marketing,sales@ems.com,False
 Finance & Accounts,accounts@ems.com,True
 Logistics & Supply,logistics@ems.com,False
@@ -9,3 +13,8 @@ Customer Support,support@ems.com,False
 Legal Department,legal@ems.com,True
 R&D Department,rd@ems.com,False
 Admin & Facilities,admin@ems.com,False
+Secured MSME,admin@example.com,FALSE
+Two Wheeler Sales,department@example.com,FALSE
+Branch Operations,branch@ems.com,FALSE
+Credit,credit@ems.com,FALSE
+Operations,operation@ems.com,FALSE
